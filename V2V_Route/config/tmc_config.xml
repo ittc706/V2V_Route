@@ -1,0 +1,20 @@
+<!--拥塞等级数量-->
+<congestion_level_num>3</congestion_level_num>
+
+
+<!--对应拥塞等级下周期事件周期，单位TTI-->
+<periodic_event_period>500 500 500</periodic_event_period>
+
+
+<!--事件的数据包数量-->
+<package_num>4</package_num>
+
+
+<!--紧急事件/周期事件/数据业务事件 每个数据包的传输TTI时间-->
+<tti_per_package>
+	3 2 2 2
+</tti_per_package>
+
+
+
+
