@@ -118,7 +118,6 @@
     <ClInclude Include="config_loader.h" />
     <ClInclude Include="context.h" />
     <ClInclude Include="enumeration.h" />
-    <ClInclude Include="event.h" />
     <ClInclude Include="fftw3.h" />
     <ClInclude Include="function.h" />
     <ClInclude Include="gtt.h" />
@@ -132,8 +131,6 @@
     <ClInclude Include="system_control.h" />
     <ClInclude Include="tmc.h" />
     <ClInclude Include="vue.h" />
-    <ClInclude Include="vue_link.h" />
-    <ClInclude Include="vue_network.h" />
     <ClInclude Include="vue_physics.h" />
     <ClInclude Include="wt.h" />
   </ItemGroup>
@@ -142,7 +139,6 @@
     <ClCompile Include="config.cpp" />
     <ClCompile Include="config_loader.cpp" />
     <ClCompile Include="context.cpp" />
-    <ClCompile Include="event.cpp" />
     <ClCompile Include="gtt.cpp" />
     <ClCompile Include="gtt_highspeed.cpp" />
     <ClCompile Include="gtt_urban.cpp" />
@@ -154,8 +150,6 @@
     <ClCompile Include="system_control.cpp" />
     <ClCompile Include="tmc.cpp" />
     <ClCompile Include="vue.cpp" />
-    <ClCompile Include="vue_link.cpp" />
-    <ClCompile Include="vue_network.cpp" />
     <ClCompile Include="vue_physics.cpp" />
     <ClCompile Include="wt.cpp" />
   </ItemGroup>

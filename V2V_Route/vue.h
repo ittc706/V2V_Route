@@ -1,13 +1,9 @@
 #pragma once
 
-
 /*
 * 前置声明
 */
 class vue_physics;
-class vue_link;
-class vue_network;
-
 
 class vue {
 	/*------------------私有字段------------------*/
@@ -17,15 +13,6 @@ private:
 	*/
 	vue_physics* m_physics_level = nullptr;
 
-	/*
-	* 指向车辆类链路层的实体
-	*/
-	vue_link* m_link_level = nullptr;
-
-	/*
-	* 指向车辆类网络层的实体
-	*/
-	vue_network* m_network_level = nullptr;
 
 	/*----------------拷贝控制成员----------------*/
 public: 
@@ -65,14 +52,4 @@ public:
 	* 车辆物理层部分访问器
 	*/
 	vue_physics* get_physics_level();
-
-	/*
-	* 车辆链路层部分访问器
-	*/
-	vue_link* get_link_level();
-
-	/*
-	* 车辆网络层部分访问器
-	*/
-	vue_network* get_network_level();
 };

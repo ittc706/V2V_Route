@@ -30,9 +30,6 @@
     <ClInclude Include="enumeration.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="event.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="fftw3.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -66,12 +63,6 @@
     <ClInclude Include="vue.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="vue_link.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="vue_network.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="vue_physics.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -96,9 +87,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="context.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="event.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="gtt.cpp">
@@ -129,12 +117,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="vue.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="vue_link.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="vue_network.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="vue_physics.cpp">

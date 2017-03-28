@@ -1,5 +1,5 @@
 #include"route_tcp.h"
-
+#include"context.h"
 using namespace std;
 
 int route_tcp_event::s_event_count = 0;
@@ -26,6 +26,12 @@ route_tcp_event* route_tcp_event::clone() {
 	return nullptr;
 }
 
+std::vector<std::set<route_tcp_node*>> route_tcp::s_node_per_pattern;
+
+route_tcp::route_tcp() {
+	//<Warn>:根据配置文件初始化s_node_per_pattern
+}
+
 void route_tcp::update_state() {
 
 }
@@ -38,14 +44,18 @@ void route_tcp::event_trigger(){
 
 }
 
-void route_tcp::process_request_connection() {
+void route_tcp::process_syn_connection() {
 
 }
 
-void route_tcp::process_queue_delay_connection() {
+void route_tcp::process_ack_connection() {
 
 }
 
-void route_tcp::process_decision_connection() {
+void route_tcp::process_transimit_connection() {
+
+}
+
+void process_response_connection() {
 
 }

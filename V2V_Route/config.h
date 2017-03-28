@@ -356,24 +356,7 @@ public:
 	config_loader* get_config_loader();
 
 	/*
-	* 拥塞等级数量
-	*/
-private:
-	int m_congestion_level_num;
-	void set_congestion_level_num(int t_congestion_level_num);
-public:
-	int get_congestion_level_num();
-
-	/*
-	* 对应拥塞等级下周期事件周期
-	*/
-private:
-	std::vector<int> m_periodic_event_period_per_congestion_level;
-public:
-	const std::vector<int>& get_periodic_event_period_per_congestion_level();
-
-	/*
-	* 周期事件包数
+	* 事件包数
 	*/
 private:
 	int m_package_num;
@@ -381,13 +364,6 @@ private:
 public:
 	int get_package_num();
 
-	/*
-	* 每个包的传输时间，以TTI为单位
-	*/
-private:
-	std::vector<int> m_tti_per_package;
-public:
-	const std::vector<int>& get_tti_per_package();
 	/*--------------------接口--------------------*/
 public:
 	void load();

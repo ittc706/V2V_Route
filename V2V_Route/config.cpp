@@ -449,28 +449,12 @@ config_loader* tmc_config::get_config_loader() {
 	return m_config_loader;
 }
 
-void tmc_config::set_congestion_level_num(int t_congestion_level_num) {
-	m_congestion_level_num = t_congestion_level_num;
-}
-
-int tmc_config::get_congestion_level_num() {
-	return m_congestion_level_num;
-}
-
-const std::vector<int>& tmc_config::get_periodic_event_period_per_congestion_level() {
-	return m_periodic_event_period_per_congestion_level;
-}
-
 void tmc_config::set_package_num(int t_package_num) {
 	m_package_num = t_package_num;
 }
 
 int tmc_config::get_package_num() {
 	return m_package_num;
-}
-
-const std::vector<int>& tmc_config::get_tti_per_package() {
-	return m_tti_per_package;
 }
 
 void tmc_config::load() {
@@ -489,43 +473,12 @@ void tmc_config::load() {
 	const string nullString("");
 	string temp;
 
-	if ((temp = get_config_loader()->get_param("congestion_level_num")) != nullString) {
-		set_congestion_level_num(stoi(temp));
-	}
-	else
-		throw logic_error("ConfigLoaderError");
-
-	if ((temp = get_config_loader()->get_param("periodic_event_period")) != nullString) {
-		stringstream ss;
-		ss << temp;
-		string temp2;
-		while (ss >> temp2) {
-			m_periodic_event_period_per_congestion_level.push_back(stoi(temp));
-		}
-	}
-	else
-		throw logic_error("ConfigLoaderError");
-
 	if ((temp = get_config_loader()->get_param("package_num")) != nullString) {
 		set_package_num(stoi(temp));
 	}
 	else
 		throw logic_error("ConfigLoaderError");
 
-	if ((temp = get_config_loader()->get_param("tti_per_package")) != nullString) {
-		stringstream ss;
-		ss << temp;
-		string temp2;
-		while (ss >> temp2) {
-			m_tti_per_package.push_back(stoi(temp2));
-		}
-	}
-	else
-		throw logic_error("ConfigLoaderError");
-
-	cout << "congestion_level_num: " << get_congestion_level_num() << endl;
-	cout << "periodic_event_period_per_congestion_level: "; array_print::print_vector_dim1(get_periodic_event_period_per_congestion_level());
 	cout << "package_num: " << get_package_num() << endl;
-	cout << "tti_per_package: "; array_print::print_vector_dim1(get_tti_per_package());
 	cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << endl;
 }

@@ -1,6 +1,8 @@
 #pragma once
 #include<vector>
 #include<list>
+#include<queue>
+#include<set>
 #include"route.h"
 
 enum route_tcp_state {
@@ -23,6 +25,7 @@ enum route_tcp_state {
 */
 
 class route_tcp_node;
+
 class route_tcp_event {
 private:
 	static int s_event_count;
@@ -122,7 +125,8 @@ public:
 	void reset();
 
 	/*
-	* 拷贝当前事件，考虑一下event_id拷贝前后是否改变<Warn>
+	* 拷贝当前事件，拷贝前后event_id不变
+	* 当某一跳成功传输，但是标记成功与否的信令传输失败，则会造成多条链路，此时才会调用clone
 	*/
 	route_tcp_event* clone();
 };
@@ -143,17 +147,36 @@ private:
 public:
 	route_tcp_state get_state() { return m_state; }
 
+private:
+	/*
+	* 事件队列，当且仅当：当前节点处于转发状态，并且触发信的事件，此时队列长度为2
+	* 其他任何时候队列中只有触发事件或者转发事件
+	*/
+	std::queue<route_tcp_event*> m_event_queue;
+
 };
 
 class route_tcp :public route {
 public:
 	/*
-	* 对整个网络层进行状态更新
+	* 正在发送(强调一下:发状态的节点)的node节点
+	* 外层下标为pattern编号
+	*/
+	static std::vector<std::set<route_tcp_node*>> s_node_per_pattern;
+
+public:
+	/*
+	* 构造函数
+	*/
+	route_tcp();
+
+	/*
+	* 对整个网络层进行状态更新，对外暴露的接口，每个TTI调用一次即可
 	*/
 	void update_state();
 
 	/*
-	* 随车辆运动而更新邻接列表
+	* 随车辆运动而更新邻接列表，车辆刷新时调用即可
 	*/
 	void update_route_table();
 
@@ -164,19 +187,24 @@ private:
 	void event_trigger();
 
 	/*
-	* 处理发送请求
+	* 处理请求连接
 	*/
-	void process_request_connection();
+	void process_syn_connection();
 
 	/*
-	* 处理预期时延信息
+	* 处理求情响应
 	*/
-	void process_queue_delay_connection();
+	void process_ack_connection();
 
 	/*
-	* 处理判决信息
+	* 处理转发数据包
 	*/
-	void process_decision_connection();
+	void process_transimit_connection();
+
+	/*
+	* 处理是否传输成功
+	*/
+	void process_response_connection();
 };
 
 

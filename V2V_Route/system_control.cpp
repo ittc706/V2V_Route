@@ -53,11 +53,11 @@ void system_control::process() {
 		//车辆运动
 		m_context->get_gtt()->fresh_location();
 
-		//更新该时刻触发的事件
-		m_context->get_tmc()->event_trigger();
+		////更新该时刻触发的事件
+		//m_context->get_tmc()->event_trigger();
 
-		//开始传输
-		m_context->get_rrm()->schedule();
+		////开始传输
+		//m_context->get_rrm()->schedule();
 
 		m_context->increase_tti();
 	}

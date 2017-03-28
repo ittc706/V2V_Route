@@ -23,8 +23,6 @@
 #include"config.h"
 #include"wt.h"
 #include"vue_physics.h"
-#include"vue_network.h"
-#include"event.h"
 
 
 using namespace std;
