@@ -126,6 +126,8 @@
     <ClInclude Include="gtt_urban.h" />
     <ClInclude Include="imta.h" />
     <ClInclude Include="matrix.h" />
+    <ClInclude Include="route.h" />
+    <ClInclude Include="route_tcp.h" />
     <ClInclude Include="rrm.h" />
     <ClInclude Include="system_control.h" />
     <ClInclude Include="tmc.h" />
@@ -147,6 +149,7 @@
     <ClCompile Include="imta.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="matrix.cpp" />
+    <ClCompile Include="route_tcp.cpp" />
     <ClCompile Include="rrm.cpp" />
     <ClCompile Include="system_control.cpp" />
     <ClCompile Include="tmc.cpp" />
