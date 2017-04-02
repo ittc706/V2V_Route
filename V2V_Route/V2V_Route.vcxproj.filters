@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="complex.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="config.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -48,12 +45,6 @@
     <ClInclude Include="imta.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="matrix.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="rrm.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="system_control.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -77,9 +68,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="complex.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="config.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -102,12 +90,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="matrix.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="rrm.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="system_control.cpp">

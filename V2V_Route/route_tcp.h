@@ -4,7 +4,13 @@
 #include<queue>
 #include<set>
 #include<utility>
+#include<random>
 #include"route.h"
+
+enum route_event_type {
+	SOURCE,
+	RELAY
+};
 
 enum route_response_state{
 	ACCEPT,
@@ -17,17 +23,17 @@ enum route_transimit_state {
 };
 
 enum route_tcp_node_state {
-	INVALID=-1,//非法状态，用于表示状态未设置
+	IDLE = 0,//空闲状态
 
-	SOURCE_SEND_SYN = 1,//source节点发送转发请求给relay节点
-	SOURCE_RECEIVE_ACK = 2,//source节点接收relay节点的应答信号
-	SOURCE_SENDING = 3,//source节点正在转发数据包
-	SOURCE_LINK_RESPONSE=4,//source节点接收relay节点的传输是否成功的响应
+	SOURCE_SEND_SYN = 11,//source节点发送转发请求给relay节点
+	SOURCE_RECEIVE_ACK = 12,//source节点接收relay节点的应答信号
+	SOURCE_SENDING = 13,//source节点正在转发数据包
+	SOURCE_LINK_RESPONSE = 14,//source节点接收relay节点的传输是否成功的响应
 
+	RELAY_SEND_ACK = 2,//relay节点发送应答信号
+	RELAY_RECEIVING = 3,//relay节点正在接收数据包
+	RELAY_LINK_RESPONSE = 4//relay节点发送传输是否成功
 
-	RELAY_SEND_ACK = 12,//relay节点发送应答信号
-	RELAY_RECEIVING = 13,//relay节点正在接收数据包
-	RELAY_LINK_RESPONSE=14//relay节点发送传输是否成功
 };
 
 /*
@@ -45,20 +51,48 @@ private:
 	static int s_event_count;
 
 	/*
+	* 事件为发送事件或接收事件
+	* 接收事件多一个字段，m_source_node_id
+	*/
+private:
+	route_event_type m_type;
+	void set_type(route_event_type t_type) {
+		m_type = t_type;
+	}
+public:
+	route_event_type get_type() {
+		return m_type;
+	}
+	
+	/*
+	* m_type为RELAY时,才有效
+	* 发送节点id
+	*/
+private:
+	int m_source_node_id;
+	void set_source_node_id(int t_source_node_id) {
+		m_source_node_id = t_source_node_id;
+	}
+public:
+	int get_source_node_id() {
+		return m_source_node_id;
+	}
+
+	/*
 	* 源节点
 	*/
 private:
-	route_tcp_node* const m_source_node;
+	route_tcp_node* const m_origin_source_node;
 public:
-	route_tcp_node* get_source_node() { return m_source_node; }
+	route_tcp_node* get_origin_source_node() { return m_origin_source_node; }
 
 	/*
 	* 目的节点
 	*/
 private:
-	route_tcp_node* const m_destination_node;
+	route_tcp_node* const m_final_destination_node;
 public:
-	route_tcp_node* get_destination_node() { return m_destination_node; }
+	route_tcp_node* get_final_destination_node() { return m_final_destination_node; }
 
 	/*
 	* 当前节点
@@ -68,7 +102,7 @@ public:
 	* 当事件传输失败，那么next节点关联的事件将被删除
 	*/
 private:
-	route_tcp_node* m_current_node;
+	route_tcp_node* m_current_node = nullptr;
 public:
 	void set_current_node(route_tcp_node* t_current_node) { m_current_node = t_current_node; }
 	route_tcp_node* get_current_node() { return m_current_node; }
@@ -91,7 +125,7 @@ public:
 	* 整个从源节点到目的节点是否传递成功
 	*/
 	bool is_all_finished() { 
-		return m_current_node == m_destination_node; 
+		return m_current_node == m_final_destination_node; 
 	}
 
 	/*
@@ -123,7 +157,7 @@ public:
 private:
 	bool m_is_curlink_finished = false;
 public:
-	bool get_is_curlink_finished() { return m_is_curlink_finished; }
+	bool is_curlink_finished() { return m_is_curlink_finished; }
 
 	/*
 	* 标记本跳是否发生丢包
@@ -136,8 +170,8 @@ public:
 private:
 	route_tcp_event(const route_tcp_event& t_route_tcp_event):
 		m_event_id(t_route_tcp_event.m_event_id),
-		m_source_node(t_route_tcp_event.m_source_node), 
-		m_destination_node(t_route_tcp_event.m_destination_node){
+		m_origin_source_node(t_route_tcp_event.m_origin_source_node), 
+		m_final_destination_node(t_route_tcp_event.m_final_destination_node){
 		m_package_num = -1;//<Warn>
 	}
 public:
@@ -146,8 +180,8 @@ public:
 	*/
 	route_tcp_event(route_tcp_node* t_source_node, route_tcp_node* t_destination_node) :
 		m_event_id(s_event_count++), 
-		m_source_node(t_source_node),
-		m_destination_node(t_destination_node) {
+		m_origin_source_node(t_source_node),
+		m_final_destination_node(t_destination_node) {
 		m_package_num = -1;//<Warn>
 	}
 
@@ -173,6 +207,7 @@ class route_tcp_node {
 
 private:
 	static int s_node_count;
+	static std::default_random_engine s_engine;
 	/*
 	* 正在发送(强调一下:发状态的节点)的node节点
 	* 外层下标为pattern编号
@@ -185,7 +220,6 @@ public:
 	int get_id() {
 		return m_id;
 	}
-
 
 	/*
 	* 邻接列表
@@ -204,12 +238,10 @@ public:
 	/*
 	* 节点下一刻可能的状态集合
 	*/
-	std::vector<route_tcp_node_state> m_next_posible_state_set;
+	std::set<route_tcp_node_state> m_next_posible_state_set;
 	void add_next_posible_state(route_tcp_node_state t_next_state) { 
-		m_next_posible_state_set.push_back(t_next_state);
+		m_next_posible_state_set.insert(t_next_state);
 	}
-public:
-	route_tcp_node_state update_next_state();
 
 	/*
 	* 节点收到的ACK响应
@@ -290,6 +322,11 @@ public:
 
 public:
 	/*
+	* 更新节点状态
+	*/
+	void update_state();
+
+	/*
 	* 选择请求转发的车辆
 	*/
 	int source_select_relay_node();
@@ -299,7 +336,7 @@ public:
 	* 返回结果若为res,则向res.first节点发送ack=接收，向res.second节点发送ack=不接受
 	* 若无法响应任何节点，那么res.first返回-1
 	*/
-	std::pair<int,std::vector<int>> relay_response_syn();
+	std::pair<int,std::vector<int>> relay_response_ack();
 };
 
 class route_tcp :public route {

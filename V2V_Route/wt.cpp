@@ -66,7 +66,7 @@ double wt::calculate_sinr(int t_send_vue_id, int t_receive_vue_id, int t_pattern
 		m_inter_ploss.push_back(vue_physics::get_pl(t_receive_vue_id, inter_vue_id));
 	}
 
-	/*****求每个子载波上的信噪比****/
+	//求每个子载波上的信噪比
 	vector<double> sinr(subcarrier_num);//每个子载波上的信噪比，维度为nt的向量
 	for (int subcarrier_idx = 0; subcarrier_idx <subcarrier_num; subcarrier_idx++) {
 		double molecule = m_pt*m_ploss;

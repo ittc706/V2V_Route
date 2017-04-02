@@ -113,7 +113,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="complex.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="config_loader.h" />
     <ClInclude Include="context.h" />
@@ -124,10 +123,8 @@
     <ClInclude Include="gtt_highspeed.h" />
     <ClInclude Include="gtt_urban.h" />
     <ClInclude Include="imta.h" />
-    <ClInclude Include="matrix.h" />
     <ClInclude Include="route.h" />
     <ClInclude Include="route_tcp.h" />
-    <ClInclude Include="rrm.h" />
     <ClInclude Include="system_control.h" />
     <ClInclude Include="tmc.h" />
     <ClInclude Include="vue.h" />
@@ -135,7 +132,6 @@
     <ClInclude Include="wt.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="complex.cpp" />
     <ClCompile Include="config.cpp" />
     <ClCompile Include="config_loader.cpp" />
     <ClCompile Include="context.cpp" />
@@ -144,9 +140,7 @@
     <ClCompile Include="gtt_urban.cpp" />
     <ClCompile Include="imta.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="matrix.cpp" />
     <ClCompile Include="route_tcp.cpp" />
-    <ClCompile Include="rrm.cpp" />
     <ClCompile Include="system_control.cpp" />
     <ClCompile Include="tmc.cpp" />
     <ClCompile Include="vue.cpp" />

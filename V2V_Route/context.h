@@ -9,7 +9,6 @@ class gtt_config;
 class rrm_config;
 class tmc_config;
 class gtt;
-class rrm;
 class tmc;
 class wt;
 class vue;
@@ -167,15 +166,6 @@ public:
 	gtt* get_gtt();
 
 	/*
-	* rrm实体指针
-	*/
-private:
-	rrm* m_rrm = nullptr;
-	void set_rrm(rrm* t_rrm);
-public:
-	rrm* get_rrm();
-
-	/*
 	* tmc实体指针
 	*/
 private:
@@ -202,30 +192,8 @@ private:
 public:
 	vue* get_vue_array();
 
-	/*
-	* 事件类数组
-	*/
-private:
-	std::vector<sender_event*> m_event_array;
-	void set_event_array();
-public:
-	std::vector<sender_event*>& get_event_array();
-
-	/*
-	* tti事件数组，
-	* 外层下标代表tti时刻
-	*/
-private:
-	std::vector<std::list<sender_event*>> m_tti_event_list;
-	void set_tti_event_list();
-public:
-	std::vector<std::list<sender_event*>>& get_tti_event_list();
-
 	/*--------------------实现--------------------*/
 private:
-	/*
-	* 为容器的成员注入依赖项，并执行相应的初始化动作
-	*/
-	void dependency_injecte();
+
 };
 

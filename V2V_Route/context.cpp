@@ -23,7 +23,6 @@
 #include"config.h"
 #include"gtt_highspeed.h"
 #include"gtt_urban.h"
-#include"rrm.h"
 #include"tmc.h"
 #include"wt.h"
 #include"vue.h"
@@ -80,17 +79,9 @@ void context::initialize() {
 	set_gtt(gtt::gtt_bind_by_mode(get_global_control_config()->get_gtt_mode()));
 	get_gtt()->set_config(get_gtt_config());
 
-	set_rrm(new rrm());
-	get_rrm()->set_config(get_rrm_config());
-
 	set_tmc(new tmc());
-	get_tmc()->set_config(get_tmc_config());
 
 	set_wt(new wt());
-
-	set_event_array();
-
-	set_tti_event_list();
 }
 
 void context::dependcy_inject() {
@@ -173,14 +164,6 @@ gtt* context::get_gtt() {
 	return m_gtt;
 }
 
-void context::set_rrm(rrm* t_rrm) {
-	m_rrm = t_rrm;
-}
-
-rrm* context::get_rrm() {
-	return m_rrm;
-}
-
 void context::set_tmc(tmc* t_tmc) {
 	m_tmc = t_tmc;
 }
@@ -198,18 +181,3 @@ wt* context::get_wt() {
 	return m_wt;
 }
 
-void context::set_event_array() {
-	m_event_array = vector<sender_event*>(0);
-}
-
-vector<sender_event*>& context::get_event_array() {
-	return m_event_array;
-}
-
-void context::set_tti_event_list() {
-	m_tti_event_list = vector<list<sender_event*>>(get_global_control_config()->get_ntti());
-}
-
-vector<std::list<sender_event*>>& context::get_tti_event_list() {
-	return m_tti_event_list;
-}
