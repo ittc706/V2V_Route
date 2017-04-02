@@ -14,6 +14,7 @@ class tmc;
 class wt;
 class vue;
 class sender_event;
+class route_tcp_node;
 
 class context {
 	/*------------------ÓÑÔªÉùÃ÷------------------*/
