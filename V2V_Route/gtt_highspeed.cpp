@@ -18,6 +18,7 @@
 
 #include<fstream>
 #include"context.h"
+#include"route.h"
 #include"config.h"
 #include"gtt_highspeed.h"
 #include"vue.h"
@@ -155,7 +156,7 @@ void gtt_highspeed::fresh_location() {
 		}
 	}
 
-
+	context::get_context()->get_route()->update_route_table_from_physics_level();
 }
 
 

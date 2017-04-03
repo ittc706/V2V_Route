@@ -1,11 +1,15 @@
 #pragma once
+#include<iostream>
 #include<vector>
 #include<list>
 #include<queue>
 #include<set>
 #include<utility>
 #include<random>
+#include<string>
 #include"route.h"
+#include"context.h"
+#include"config.h"
 
 enum route_event_type {
 	SOURCE,
@@ -56,10 +60,10 @@ private:
 	*/
 private:
 	route_event_type m_type;
+public:
 	void set_type(route_event_type t_type) {
 		m_type = t_type;
 	}
-public:
 	route_event_type get_type() {
 		return m_type;
 	}
@@ -70,9 +74,6 @@ public:
 	*/
 private:
 	int m_source_node_id;
-	void set_source_node_id(int t_source_node_id) {
-		m_source_node_id = t_source_node_id;
-	}
 public:
 	int get_source_node_id() {
 		return m_source_node_id;
@@ -175,7 +176,10 @@ public:
 		m_event_id(s_event_count++), 
 		m_origin_source_node(t_source_node),
 		m_final_destination_node(t_destination_node) {
-		m_package_num = -1;//<Warn>
+		m_current_node = t_source_node;
+		m_package_num = context::get_context()->get_tmc_config()->get_package_num();
+		m_type = SOURCE;
+		m_through_node_vec.push_back(m_current_node);
 	}
 
 	/*
@@ -193,6 +197,11 @@ public:
 	* 当某一跳成功传输，但是标记成功与否的信令传输失败，则会造成多条链路，此时才会调用clone
 	*/
 	route_tcp_event* clone();
+
+	/*
+	* 转为字符串
+	*/
+	std::string to_string();
 };
 
 class route_tcp_node {
@@ -217,12 +226,21 @@ public:
 	/*
 	* 邻接列表
 	*/
-	std::list<route_tcp_node*> m_adjacent_list;
-
 private:
+	std::vector<int> m_adjacent_list;
+public:
+	void add_to_adjacent_list(int t_node_id) {
+		m_adjacent_list.push_back(t_node_id);
+	}
+	const std::vector<int>& get_adjacent_list() {
+		return m_adjacent_list;
+	}
+
+
 	/*
 	* 节点当前状态状态
 	*/
+private:
 	route_tcp_node_state m_cur_state;
 	void set_cur_state(route_tcp_node_state t_cur_state) { m_cur_state = t_cur_state; }
 public:
@@ -231,6 +249,7 @@ public:
 	/*
 	* 节点下一刻可能的状态集合
 	*/
+private:
 	std::set<route_tcp_node_state> m_next_posible_state_set;
 	void add_next_posible_state(route_tcp_node_state t_next_state) { 
 		m_next_posible_state_set.insert(t_next_state);
@@ -360,6 +379,7 @@ private:
 	void add_failed_event(route_tcp_event* t_failed_event_vec) {
 		m_failed_event_vec.push_back(t_failed_event_vec);
 	}
+public:
 	const std::vector<route_tcp_event*>& get_successful_event_vec() {
 		return m_successful_event_vec;
 	}
