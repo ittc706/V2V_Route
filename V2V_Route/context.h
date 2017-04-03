@@ -8,6 +8,7 @@ class global_control_config;
 class gtt_config;
 class rrm_config;
 class tmc_config;
+class route_config;
 class gtt;
 class tmc;
 class wt;
@@ -167,7 +168,7 @@ public:
 	* tmc配置参数对象
 	*/
 private:
-	route_config*
+	route_config* m_route_config;
 
 	/*
 	* tti,仿真时刻
