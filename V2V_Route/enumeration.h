@@ -6,9 +6,11 @@ enum platform {
 };
 
 enum gtt_mode {
-	HIGHSPEED, URBAN
+	HIGHSPEED, 
+	URBAN
 };
 
-enum event_type {
-	PERIOD
+enum route_mode {
+	TCP
 };
+

@@ -93,6 +93,10 @@ std::pair<int, std::vector<int>> route_tcp_node::relay_response_ack() {
 }
 
 route_tcp::route_tcp() {
+
+}
+
+void route_tcp::initialize() {
 	//<Warn>:根据配置文件初始化s_node_per_pattern
 
 }
@@ -114,7 +118,7 @@ void route_tcp::process_per_tti() {
 	process_response_connection();
 }
 
-void route_tcp::update_route_table() {
+void route_tcp::update_route_table_from_physics_level() {
 	//<Warn>:从物理层拉取邻接链表
 }
 

@@ -140,6 +140,7 @@
     <ClCompile Include="gtt_urban.cpp" />
     <ClCompile Include="imta.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="route.cpp" />
     <ClCompile Include="route_tcp.cpp" />
     <ClCompile Include="system_control.cpp" />
     <ClCompile Include="tmc.cpp" />

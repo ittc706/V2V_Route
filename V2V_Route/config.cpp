@@ -26,38 +26,6 @@
 
 using namespace std;
 
-void global_control_config::set_config_loader(config_loader* t_config_loader) {
-	m_config_loader = t_config_loader;
-}
-
-config_loader* global_control_config::get_config_loader() {
-	return m_config_loader;
-}
-
-void global_control_config::set_platform(platform t_platform) {
-	m_platform = t_platform;
-}
-
-platform global_control_config::get_platform() {
-	return m_platform;
-}
-
-void global_control_config::set_ntti(int t_ntti) {
-	m_ntti = t_ntti;
-}
-
-int global_control_config::get_ntti() {
-	return m_ntti;
-}
-
-void global_control_config::set_gtt_mode(gtt_mode t_gtt_mode) {
-	m_gtt_mode = t_gtt_mode;
-}
-
-gtt_mode global_control_config::get_gtt_mode() {
-	return m_gtt_mode;
-}
-
 void global_control_config::load() {
 	//首先先判断当前的平台，利用路径的表示在两个平台下的差异来判断
 	ifstream inPlatformWindows("config\\global_control_config.xml"),
@@ -107,8 +75,18 @@ void global_control_config::load() {
 	else
 		throw logic_error("ConfigLoaderError");
 
+	if ((temp = get_config_loader()->get_param("route_mode")) != nullString) {
+		if (temp == "TCP")
+			set_route_mode(TCP);
+		else
+			throw logic_error("ConfigLoaderError");
+	}
+	else
+		throw logic_error("ConfigLoaderError");
+
 	cout << "ntti: " << get_ntti() << endl;
 	cout << "gtt_mode: " << (get_gtt_mode() == URBAN ? "URBAN" : "HIGHSPEED") << endl;
+	cout << "route_mode: " << (get_route_mode() == TCP ? "TCP" : "ERROR") << endl;
 	cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << endl;
 }
 
@@ -119,54 +97,6 @@ gtt_config* gtt_config::gtt_config_bind_by_mode(gtt_mode t_mode) {
 	else {
 		return new gtt_urban_config();
 	}
-}
-
-void gtt_config::set_config_loader(config_loader* t_config_loader) {
-	m_config_loader = t_config_loader;
-}
-
-config_loader* gtt_config::get_config_loader() {
-	return m_config_loader;
-}
-
-int gtt_highspeed_config::get_road_num() {
-	return m_road_num;
-}
-
-void gtt_highspeed_config::set_road_length(double t_road_length) {
-	m_road_length = t_road_length;
-}
-
-double gtt_highspeed_config::get_road_length() {
-	return m_road_length;
-}
-
-void gtt_highspeed_config::set_road_width(double t_road_width) {
-	m_road_width = t_road_width;
-}
-
-double gtt_highspeed_config::get_road_width() {
-	return m_road_width;
-}
-
-void gtt_highspeed_config::set_speed(double t_speed) {
-	m_speed = t_speed;
-}
-
-double gtt_highspeed_config::get_speed() {
-	return m_speed;
-}
-
-const double* gtt_highspeed_config::get_road_topo_ratio() {
-	return m_road_topo_ratio;
-}
-
-void gtt_highspeed_config::set_freshtime(int t_freshtime) {
-	m_freshtime = t_freshtime;
-}
-
-int gtt_highspeed_config::get_freshtime() {
-	return m_freshtime;
 }
 
 void gtt_highspeed_config::load() {
@@ -273,114 +203,6 @@ void gtt_urban_config::load() {
 	cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << endl;
 }
 
-int gtt_urban_config::get_road_num() {
-	return m_road_num;
-}
-
-void gtt_urban_config::set_road_length_ew(double t_road_length_ew) {
-	m_road_length_ew = t_road_length_ew;
-}
-
-double gtt_urban_config::get_road_length_ew() {
-	return m_road_length_ew;
-}
-
-void gtt_urban_config::set_road_length_sn(double t_road_length_sn) {
-	m_road_length_sn = t_road_length_sn;
-}
-
-double gtt_urban_config::get_road_length_sn() {
-	return m_road_length_sn;
-}
-void gtt_urban_config::set_road_width(double t_road_width) {
-	m_road_width = t_road_width;
-}
-
-double gtt_urban_config::get_road_width() {
-	return m_road_width;
-}
-
-void gtt_urban_config::set_speed(double t_speed) {
-	m_speed = t_speed;
-}
-
-double gtt_urban_config::get_speed() {
-	return m_speed;
-}
-
-const double* gtt_urban_config::get_road_topo_ratio() {
-	return m_road_topo_ratio;
-}
-
-const int(*gtt_urban_config::get_wrap_around_road())[9] {
-	return m_wrap_around_road;
-}
-
-void gtt_urban_config::set_freshtime(int t_freshtime) {
-	m_freshtime = t_freshtime;
-}
-
-int gtt_urban_config::get_freshtime() {
-	return m_freshtime;
-}
-
-
-void rrm_config::set_config_loader(config_loader* t_config_loader) {
-	m_config_loader = t_config_loader;
-}
-
-config_loader* rrm_config::get_config_loader() {
-	return m_config_loader;
-}
-
-void rrm_config::set_total_bandwidth(int t_total_bandwidth) {
-	m_total_bandwidth = t_total_bandwidth;
-}
-
-int rrm_config::get_total_bandwidth() {
-	return m_total_bandwidth;
-}
-
-void rrm_config::set_rb_num_per_pattern(int t_rb_num_per_pattern) {
-	m_rb_num_per_pattern = t_rb_num_per_pattern;
-}
-
-int rrm_config::get_rb_num_per_pattern() {
-	return m_rb_num_per_pattern;
-}
-
-void rrm_config::set_pattern_num() {
-	m_pattern_num = get_total_bandwidth() / s_BANDWIDTH_OF_RB / get_rb_num_per_pattern();
-}
-
-int rrm_config::get_pattern_num() {
-	return m_pattern_num;
-}
-
-void rrm_config::set_drop_sinr_boundary(double t_drop_sinr_boundary) {
-	m_drop_sinr_boundary = t_drop_sinr_boundary;
-}
-
-double rrm_config::get_drop_sinr_boundary() {
-	return m_drop_sinr_boundary;
-}
-
-void rrm_config::set_select_altorithm(int t_select_altorithm) {
-	m_select_altorithm = t_select_altorithm;
-}
-
-int rrm_config::get_select_altorithm() {
-	return m_select_altorithm;
-}
-
-void rrm_config::set_time_division_granularity(int t_time_division_granularity) {
-	m_time_division_granularity = t_time_division_granularity;
-}
-
-int rrm_config::get_time_division_granularity() {
-	return m_time_division_granularity;
-}
-
 void rrm_config::load() {
 	//开始解析系统配置文件
 	switch (context::get_context()->get_global_control_config()->get_platform()) {
@@ -441,22 +263,6 @@ void rrm_config::load() {
 	cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << endl;
 }
 
-void tmc_config::set_config_loader(config_loader* t_config_loader) {
-	m_config_loader = t_config_loader;
-}
-
-config_loader* tmc_config::get_config_loader() {
-	return m_config_loader;
-}
-
-void tmc_config::set_package_num(int t_package_num) {
-	m_package_num = t_package_num;
-}
-
-int tmc_config::get_package_num() {
-	return m_package_num;
-}
-
 void tmc_config::load() {
 	//开始解析系统配置文件
 	switch (context::get_context()->get_global_control_config()->get_platform()) {
@@ -482,3 +288,24 @@ void tmc_config::load() {
 	cout << "package_num: " << get_package_num() << endl;
 	cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << endl;
 }
+
+
+//void route_config::load() {
+//	//开始解析系统配置文件
+//	switch (context::get_context()->get_global_control_config()->get_platform()) {
+//	case Windows:
+//		get_config_loader()->resolv_config_file("config\\route_config.xml");
+//		break;
+//	case Linux:
+//		get_config_loader()->resolv_config_file("config/route_config.xml");
+//		break;
+//	default:
+//		throw logic_error("Platform Config Error!");
+//	}
+//
+//	const string nullString("");
+//	string temp;
+//
+//
+//	cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << endl;
+//}

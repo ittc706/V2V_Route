@@ -9,6 +9,12 @@
 
 
 
+<!--路由模式算则
+	[TCP]：类似于TCP的握手方式-->	
+<route_mode>TCP</route_mode>
+
+
+
 
 
 

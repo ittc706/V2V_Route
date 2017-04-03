@@ -13,7 +13,7 @@ class tmc;
 class wt;
 class vue;
 class sender_event;
-class route_tcp_node;
+class route;
 
 class context {
 	/*------------------友元声明------------------*/
@@ -23,7 +23,6 @@ class context {
 	friend class system_control;
 	friend class gtt_highspeed;
 	friend class gtt_urban;
-	friend class tmc;
 	/*------------------静态成员字段------------------*/
 private:
 	/*
@@ -37,18 +36,6 @@ public:
 	*/
 	static context* get_context();
 
-private:
-	/*
-	* 单例模式下，设置唯一实体的指针
-	*/
-	static void set_context(context* t_singleton_context);
-
-private:
-	/*
-	* 单例模式下，生成唯一实体
-	*/
-	static void context_build();
-
 	/*----------------拷贝控制成员----------------*/
 private:
 	/*
@@ -59,12 +46,17 @@ private:
 	/*
 	* 单例对象生成
 	*/
-	void initialize();
+	void singleton_initialize();
 
 	/*
 	* 依赖注入
 	*/
 	void dependcy_inject();
+
+	/*
+	* 对象生成，以及依赖注入以后，执行的对象的初始化方法
+	*/
+	void post_processor();
 
 public:
 	/*
@@ -98,54 +90,84 @@ public:
 	*/
 private:
 	system_control* m_system_control = nullptr;
-	void set_system_control(system_control* t_system_control);
+	void set_system_control(system_control* t_system_control) {
+		m_system_control = t_system_control;
+	}
 public:
-	system_control* get_system_control();
+	system_control* get_system_control() {
+		return m_system_control;
+	}
 
 	/*
 	* 配置文件加载对象、编辑器、访问器
 	*/
 private:
 	config_loader* m_config_loader = nullptr;
-	void set_config_loader(config_loader* t_config_loader);
+	void set_config_loader(config_loader* t_config_loader) {
+		m_config_loader = t_config_loader;
+	}
 public:
-	config_loader* get_config_loader();
+	config_loader* get_config_loader() {
+		return m_config_loader;
+	}
 
 	/*
 	* global_control配置参数对象
 	*/
 private:
 	global_control_config* m_global_control_config = nullptr;
-	void set_global_control_config(global_control_config* t_global_control_config);
+	void set_global_control_config(global_control_config* t_global_control_config) {
+		m_global_control_config = t_global_control_config;
+	}
 public:
-	global_control_config* get_global_control_config();
+	global_control_config* get_global_control_config() {
+		return m_global_control_config;
+	}
 
 	/*
 	* gtt配置参数对象
 	*/
 private:
 	gtt_config* m_gtt_config = nullptr;
-	void set_gtt_config(gtt_config* t_gtt_config);
+	void set_gtt_config(gtt_config* t_gtt_config) {
+		m_gtt_config = t_gtt_config;
+	}
 public:
-	gtt_config* get_gtt_config();
+	gtt_config* get_gtt_config() {
+		return m_gtt_config;
+	}
 
 	/*
 	* rrm配置参数对象
 	*/
 private:
 	rrm_config* m_rrm_config = nullptr;
-	void set_rrm_config(rrm_config* t_rrm_config);
+	void set_rrm_config(rrm_config* t_rrm_config) {
+		m_rrm_config = t_rrm_config;
+	}
 public:
-	rrm_config* get_rrm_config();
+	rrm_config* get_rrm_config() {
+		return m_rrm_config;
+	}
 
 	/*
 	* tmc配置参数对象
 	*/
 private:
 	tmc_config* m_tmc_config = nullptr;
-	void set_tmc_config(tmc_config* t_tmc_config);
+	void set_tmc_config(tmc_config* t_tmc_config) {
+		m_tmc_config = t_tmc_config;
+	}
 public:
-	tmc_config* get_tmc_config();
+	tmc_config* get_tmc_config() {
+		return m_tmc_config;
+	}
+
+	/*
+	* tmc配置参数对象
+	*/
+private:
+	route_config*
 
 	/*
 	* tti,仿真时刻
@@ -153,47 +175,76 @@ public:
 private:
 	int m_tti = 0;
 public:
-	void increase_tti();
-	int get_tti();
+	void increase_tti() {
+		++m_tti;
+	}
+	int get_tti() {
+		return m_tti;
+	}
 
 	/*
 	* gtt实体指针
 	*/
 private:
 	gtt* m_gtt = nullptr;
-	void set_gtt(gtt* t_gtt);
+	void set_gtt(gtt* t_gtt) {
+		m_gtt = t_gtt;
+	}
 public:
-	gtt* get_gtt();
+	gtt* get_gtt() {
+		return m_gtt;
+	}
 
 	/*
 	* tmc实体指针
 	*/
 private:
 	tmc* m_tmc = nullptr;
-	void set_tmc(tmc* t_tmc);
+	void set_tmc(tmc* t_tmc) {
+		m_tmc = t_tmc;
+	}
 public:
-	tmc* get_tmc();
+	tmc* get_tmc() {
+		return m_tmc;
+	}
 
 	/*
 	* wt对象，为非单例模式，可以请求数个wt类型的对象
 	*/
 private:
 	wt* m_wt = nullptr;
-	void set_wt(wt* t_wt);
+	void set_wt(wt* t_wt) {
+		m_wt = t_wt;
+	}
 public:
-	wt* get_wt();
+	wt* get_wt() {
+		return m_wt;
+	}
 
 	/*
 	* 车辆类数组指针
 	*/
 private:
 	vue* m_vue_array = nullptr;
-	void set_vue_array(vue* t_vue_array);
+	void set_vue_array(vue* t_vue_array) {
+		m_vue_array = t_vue_array;
+	}
 public:
-	vue* get_vue_array();
+	vue* get_vue_array() {
+		return m_vue_array;
+	}
 
-	/*--------------------实现--------------------*/
+	/*
+	* route
+	*/
 private:
-
+	route* m_route;
+	void set_route(route* t_route) {
+		m_route = t_route;
+	}
+public:
+	route* get_route() {
+		return m_route;
+	}
 };
 

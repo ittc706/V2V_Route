@@ -25,14 +25,23 @@ public:
 	*/
 private:
 	gtt_config* m_config;
-	void set_config(gtt_config* t_config);
+	void set_config(gtt_config* t_config) {
+		m_config = t_config;
+	}
 public:
-	gtt_config* get_config();
+	gtt_config* get_config() {
+		return m_config;
+	}
 
 	/*--------------------接口--------------------*/
-
+	/*
+	* 做一些初始化工作
+	*/
 	virtual void initialize() = 0;
 
+	/*
+	* 获取车辆数量
+	*/
 	virtual int get_vue_num() = 0;
 
 	/*

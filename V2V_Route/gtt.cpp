@@ -14,11 +14,3 @@ gtt* gtt::gtt_bind_by_mode(gtt_mode t_mode) {
 		return new gtt_urban();
 	}
 }
-
-void gtt::set_config(gtt_config* t_config) {
-	m_config = t_config;
-}
-
-gtt_config* gtt::get_config() {
-	return m_config;
-}

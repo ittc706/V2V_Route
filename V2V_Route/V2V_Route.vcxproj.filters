@@ -110,5 +110,8 @@
     <ClCompile Include="route_tcp.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="route.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

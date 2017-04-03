@@ -377,14 +377,19 @@ public:
 	route_tcp();
 
 	/*
+	* 初始化
+	*/
+	void initialize()override;
+
+	/*
 	* 对整个网络层进行状态更新，对外暴露的接口，每个TTI调用一次即可
 	*/
-	void process_per_tti();
+	void process_per_tti()override;
 
 	/*
 	* 随车辆运动而更新邻接列表，车辆刷新时调用即可
 	*/
-	void update_route_table();
+	void update_route_table_from_physics_level()override;
 
 private:
 	/*
