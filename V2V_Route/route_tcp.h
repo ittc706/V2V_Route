@@ -27,16 +27,20 @@ enum route_transimit_state {
 };
 
 enum route_tcp_node_state {
+	/*
+	* 以下状态的值都是设计过的，请不要随意调整
+	*/
+
 	IDLE = 0,//空闲状态
 
-	SOURCE_SEND_SYN = 11,//source节点发送转发请求给relay节点
-	SOURCE_RECEIVE_ACK = 12,//source节点接收relay节点的应答信号
-	SOURCE_SENDING = 13,//source节点正在转发数据包
-	SOURCE_LINK_RESPONSE = 14,//source节点接收relay节点的传输是否成功的响应
+	SOURCE_SEND_SYN = 3,//source节点发送转发请求给relay节点
+	SOURCE_RECEIVE_ACK = 2,//source节点接收relay节点的应答信号
+	SOURCE_SENDING = 4,//source节点正在转发数据包
+	SOURCE_LINK_RESPONSE = 5,//source节点接收relay节点的传输是否成功的响应
 
-	RELAY_SEND_ACK = 2,//relay节点发送应答信号
-	RELAY_RECEIVING = 3,//relay节点正在接收数据包
-	RELAY_LINK_RESPONSE = 4//relay节点发送传输是否成功
+	RELAY_SEND_ACK = 1,//relay节点发送应答信号
+	RELAY_RECEIVING = 6,//relay节点正在接收数据包
+	RELAY_LINK_RESPONSE = 7//relay节点发送传输是否成功
 
 };
 
@@ -210,6 +214,11 @@ class route_tcp_node {
 private:
 	static int s_node_count;
 	static std::default_random_engine s_engine;
+
+	static std::ofstream s_logger;
+
+	static void log(route_tcp_node* t_node);
+
 	/*
 	* 正在发送(强调一下:发状态的节点)的node节点
 	* 外层下标为pattern编号
@@ -241,7 +250,7 @@ public:
 	* 节点当前状态状态
 	*/
 private:
-	route_tcp_node_state m_cur_state;
+	route_tcp_node_state m_cur_state = IDLE;
 	void set_cur_state(route_tcp_node_state t_cur_state) { m_cur_state = t_cur_state; }
 public:
 	route_tcp_node_state get_cur_state() { return m_cur_state; }
@@ -323,7 +332,13 @@ public:
 	}
 
 	/*
-	* 当前节点(作为relay节点)接收来自其他车辆的syn请求的列表
+	* 当前节点(作为relay节点)接收来自其他车辆的syn请求的列表(当前tti)
+	*/
+private:
+	std::vector<int> m_relay_pre_syn_node_vec;
+
+	/*
+	* 当前节点(作为relay节点)接收来自其他车辆的syn请求的列表(当前tti)
 	*/
 private:
 	std::vector<int> m_relay_syn_node_vec;
@@ -349,6 +364,9 @@ public:
 	* 若无法响应任何节点，那么res.first返回-1
 	*/
 	std::pair<int,std::vector<int>> relay_response_ack();
+
+private:
+	void check_state();
 };
 
 class route_tcp :public route {
@@ -359,6 +377,14 @@ class route_tcp :public route {
 
 private:
 	static std::default_random_engine s_engine;
+
+	static std::ofstream s_logger;
+public:
+	static std::string state_to_string(route_tcp_node_state state);
+private:
+	static void log(int source_node_id, int relay_node_id, 
+		route_event_type event_type, route_tcp_node_state cur_state, 
+		route_tcp_node_state next_state, std::string description);
 
 private:
 	route_tcp_node* m_node_array;
