@@ -167,13 +167,6 @@ private:
 public:
 	bool get_is_curlink_loss() { return m_is_curlink_loss; }
 
-private:
-	route_tcp_event(const route_tcp_event& t_route_tcp_event):
-		m_event_id(t_route_tcp_event.m_event_id),
-		m_origin_source_node(t_route_tcp_event.m_origin_source_node), 
-		m_final_destination_node(t_route_tcp_event.m_final_destination_node){
-		m_package_num = -1;//<Warn>
-	}
 public:
 	/*
 	* 构造函数，提供给事件触发模块调用
@@ -346,10 +339,14 @@ class route_tcp :public route {
 	friend class context;
 
 private:
+	static std::default_random_engine s_engine;
+
+private:
 	route_tcp_node* m_node_array;
-	void set_node_array(route_tcp_node* t_node_array) { m_node_array = t_node_array ; }
 public:
-	route_tcp_node* get_node_array() { return m_node_array; }
+	route_tcp_node* get_node_array() { 
+		return m_node_array; 
+	}
 
 private:
 	/*

@@ -285,27 +285,34 @@ void tmc_config::load() {
 	else
 		throw logic_error("ConfigLoaderError");
 
+	if ((temp = get_config_loader()->get_param("trigger_rate")) != nullString) {
+		set_trigger_rate(stod(temp));
+	}
+	else
+		throw logic_error("ConfigLoaderError");
+
 	cout << "package_num: " << get_package_num() << endl;
+	cout << "trigger_rate: " << get_trigger_rate() << endl;
 	cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << endl;
 }
 
 
-//void route_config::load() {
-//	//开始解析系统配置文件
-//	switch (context::get_context()->get_global_control_config()->get_platform()) {
-//	case Windows:
-//		get_config_loader()->resolv_config_file("config\\route_config.xml");
-//		break;
-//	case Linux:
-//		get_config_loader()->resolv_config_file("config/route_config.xml");
-//		break;
-//	default:
-//		throw logic_error("Platform Config Error!");
-//	}
-//
-//	const string nullString("");
-//	string temp;
-//
-//
-//	cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << endl;
-//}
+void route_config::load() {
+	//开始解析系统配置文件
+	switch (context::get_context()->get_global_control_config()->get_platform()) {
+	case Windows:
+		get_config_loader()->resolv_config_file("config\\route_config.xml");
+		break;
+	case Linux:
+		get_config_loader()->resolv_config_file("config/route_config.xml");
+		break;
+	default:
+		throw logic_error("Platform Config Error!");
+	}
+
+	const string nullString("");
+	string temp;
+
+
+	cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << endl;
+}

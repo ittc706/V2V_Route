@@ -165,10 +165,17 @@ public:
 	}
 
 	/*
-	* tmc配置参数对象
+	* route配置参数对象
 	*/
 private:
 	route_config* m_route_config;
+	void set_route_config(route_config* t_route_config) {
+		m_route_config = t_route_config;
+	}
+public:
+	route_config* get_route_config() {
+		return m_route_config;
+	}
 
 	/*
 	* tti,仿真时刻
@@ -181,6 +188,19 @@ public:
 	}
 	int get_tti() {
 		return m_tti;
+	}
+
+	/*
+	* route
+	*/
+private:
+	route* m_route;
+	void set_route(route* t_route) {
+		m_route = t_route;
+	}
+public:
+	route* get_route() {
+		return m_route;
 	}
 
 	/*
@@ -233,19 +253,6 @@ private:
 public:
 	vue* get_vue_array() {
 		return m_vue_array;
-	}
-
-	/*
-	* route
-	*/
-private:
-	route* m_route;
-	void set_route(route* t_route) {
-		m_route = t_route;
-	}
-public:
-	route* get_route() {
-		return m_route;
 	}
 };
 

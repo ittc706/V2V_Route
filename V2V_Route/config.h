@@ -479,35 +479,48 @@ public:
 		return m_package_num;
 	}
 
+	/*
+	*  事件触发概率
+	*/
+private:
+	double m_trigger_rate;
+	void set_trigger_rate(double t_trigger_rate) {
+		m_trigger_rate = t_trigger_rate;
+	}
+public:
+	double get_trigger_rate() {
+		return m_trigger_rate;
+	}
+
 	/*--------------------接口--------------------*/
 public:
 	void load();
 };
 
 
-//class route_config {
-//	/*------------------友元声明------------------*/
-//	/*
-//	* 将context设为友元，容器要为其注入依赖项
-//	*/
-//	friend class context;
-//
-//	/*--------------------字段--------------------*/
-//	/*
-//	* 类加载器对象
-//	*/
-//private:
-//	config_loader* m_config_loader;
-//	void set_config_loader(config_loader* t_config_loader) {
-//		m_config_loader = t_config_loader;
-//	}
-//public:
-//	config_loader* get_config_loader() {
-//		return m_config_loader;
-//	}
-//
-//
-//	/*--------------------接口--------------------*/
-//public:
-//	void load();
-//};
+class route_config {
+	/*------------------友元声明------------------*/
+	/*
+	* 将context设为友元，容器要为其注入依赖项
+	*/
+	friend class context;
+
+	/*--------------------字段--------------------*/
+	/*
+	* 类加载器对象
+	*/
+private:
+	config_loader* m_config_loader;
+	void set_config_loader(config_loader* t_config_loader) {
+		m_config_loader = t_config_loader;
+	}
+public:
+	config_loader* get_config_loader() {
+		return m_config_loader;
+	}
+
+
+	/*--------------------接口--------------------*/
+public:
+	void load();
+};

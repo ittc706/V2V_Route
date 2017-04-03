@@ -1,5 +1,8 @@
+#include<iostream>
 #include"route_tcp.h"
 #include"context.h"
+#include"config.h"
+#include"gtt.h"
 using namespace std;
 
 int route_tcp_event::s_event_count = 0;
@@ -92,16 +95,23 @@ std::pair<int, std::vector<int>> route_tcp_node::relay_response_ack() {
 	return std::pair<int, std::vector<int>>(select_node_id, nonselect_node_id_vec);
 }
 
+default_random_engine route_tcp::s_engine;
+
 route_tcp::route_tcp() {
 
 }
 
 void route_tcp::initialize() {
-	//<Warn>:根据配置文件初始化s_node_per_pattern
-
+	//<Warn>:初始化节点
+	context* __context = context::get_context();
+	int vue_num = __context->get_gtt()->get_vue_num();
+	m_node_array = new route_tcp_node[vue_num];
 }
 
 void route_tcp::process_per_tti() {
+	//事件触发
+	event_trigger();
+
 	//更新节点状态
 	update_node_state();
 
@@ -122,8 +132,30 @@ void route_tcp::update_route_table_from_physics_level() {
 	//<Warn>:从物理层拉取邻接链表
 }
 
-void route_tcp::event_trigger(){
-	//<Warn>:随机产生事件
+void route_tcp::event_trigger() {
+	context* __context = context::get_context();
+	double trigger_rate = __context->get_tmc_config()->get_trigger_rate();
+
+	uniform_real_distribution<double> u_rate(0, 1);
+	cout << route_tcp_node::s_node_count << endl;
+	uniform_int_distribution<int> u_node_id(0, route_tcp_node::s_node_count - 1);
+
+	for (int origin_source_node_id = 0; origin_source_node_id < route_tcp_node::s_node_count; origin_source_node_id++) {
+		if (u_rate(s_engine) < trigger_rate) {
+			route_tcp_node* origin_source_node = &get_node_array()[origin_source_node_id];
+
+			int final_destination_node_id = origin_source_node_id;
+			while (final_destination_node_id == origin_source_node_id) {
+				final_destination_node_id = u_node_id(s_engine);
+			}
+
+			route_tcp_node* final_destination_node= &get_node_array()[final_destination_node_id];
+
+			get_node_array()[origin_source_node_id].add_source_event(
+				new route_tcp_event(origin_source_node, final_destination_node)
+				);
+		}
+	}
 }
 
 void route_tcp::process_syn_connection() {

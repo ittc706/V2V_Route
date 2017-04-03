@@ -21,6 +21,7 @@
 #include"system_control.h"
 #include"config_loader.h"
 #include"config.h"
+#include"route.h"
 #include"gtt_highspeed.h"
 #include"gtt_urban.h"
 #include"tmc.h"
@@ -53,6 +54,7 @@ void context::singleton_initialize() {
 	set_gtt_config(gtt_config::gtt_config_bind_by_mode(get_global_control_config()->get_gtt_mode()));
 	set_rrm_config(new rrm_config());
 	set_tmc_config(new tmc_config());
+	set_route(route::route_bind_by_mode(get_global_control_config()->get_route_mode()));
 	set_gtt(gtt::gtt_bind_by_mode(get_global_control_config()->get_gtt_mode()));
 	set_tmc(new tmc());
 	set_wt(new wt());
@@ -72,6 +74,8 @@ void context::post_processor() {
 	get_gtt_config()->load();
 	get_rrm_config()->load();
 	get_tmc_config()->load();
+	get_gtt()->initialize();
+	get_route()->initialize();
 	wt::set_resource();
 }
 
