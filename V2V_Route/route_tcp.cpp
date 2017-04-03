@@ -47,7 +47,8 @@ void route_tcp_node::update_state() {
 	route_tcp_node_state max_state = IDLE;
 
 	if (m_next_posible_state_set.find(RELAY_SEND_ACK) == m_next_posible_state_set.end()) {
-		if (m_next_posible_state_set.size() != 1) {
+		if (m_next_posible_state_set.size() >1) {
+			cout << "hehe" << endl;
 			throw logic_error("error");
 		}
 	}
@@ -137,7 +138,6 @@ void route_tcp::event_trigger() {
 	double trigger_rate = __context->get_tmc_config()->get_trigger_rate();
 
 	uniform_real_distribution<double> u_rate(0, 1);
-	cout << route_tcp_node::s_node_count << endl;
 	uniform_int_distribution<int> u_node_id(0, route_tcp_node::s_node_count - 1);
 
 	for (int origin_source_node_id = 0; origin_source_node_id < route_tcp_node::s_node_count; origin_source_node_id++) {
