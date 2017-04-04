@@ -11,36 +11,19 @@
 #include"function.h"
 using namespace std;
 
-int route_tcp_event::s_event_count = 0;
+int route_tcp_route_event::s_event_count = 0;
 
-void route_tcp_event::transimit() {
-	//<Warn>:一跳就在指定频段传输，不再分成多个包分别选择频段传输了
-	
-	if (++m_package_idx == m_package_num) {
-		m_is_curlink_finished = true;
-		if (m_type != RELAY) throw logic_error("error");
-		m_through_node_vec.push_back(m_current_node);
-	}
-	double sinr = -1;
-	//<Warn>:sinr计算待补充，以及是否丢包字段的维护
-
-}
-
-void route_tcp_event::reset() {
-	m_package_idx = 0;
-	m_is_curlink_finished = false;
-	m_is_curlink_loss = false;
-}
-
-route_tcp_event* route_tcp_event::clone() {
-	route_tcp_event* clone_event = new route_tcp_event(get_origin_source_node(),get_final_destination_node());
+route_tcp_route_event* route_tcp_route_event::clone() {
+	route_tcp_route_event* clone_event = new route_tcp_route_event(get_origin_source_node(),get_final_destination_node());
 	clone_event->m_through_node_vec = m_through_node_vec;
-	clone_event->m_type = RELAY;
-	clone_event->m_source_node_id = this->get_current_node()->get_id();
 	return clone_event;
 }
 
-std::string route_tcp_event::to_string() {
+void route_tcp_route_event::transfer_to(route_tcp_node* t_node) {
+	set_current_node(t_node);
+}
+
+std::string route_tcp_route_event::to_string() {
 	stringstream ss;
 	for (int i = 0; i < m_through_node_vec.size();i++) {
 		ss << "node[" << left << setw(3) << m_through_node_vec[i]->get_id() << "]";
@@ -48,6 +31,16 @@ std::string route_tcp_event::to_string() {
 	}
 	ss << endl;
 	return ss.str();
+}
+
+void route_tcp_link_event::transimit() {
+	//<Warn>:一跳就在指定频段传输，不再分成多个包分别选择频段传输了
+
+	if (++m_package_idx == m_package_num) {
+		m_is_finished = true;
+	}
+	double sinr = -1;
+	//<Warn>:sinr计算待补充，以及是否丢包字段的维护
 }
 
 int route_tcp_node::s_node_count = 0;
@@ -69,11 +62,6 @@ void route_tcp_node::log(route_tcp_node* t_node) {
 
 std::vector<std::set<route_tcp_node*>> route_tcp_node::s_node_per_pattern;
 
-void route_tcp_node::transfer_event_from_relay_queue_to_source_queue() {
-	m_relay_event_queue.front()->set_type(SOURCE);
-	add_source_event(m_relay_event_queue.front());
-	m_relay_event_queue.pop();
-}
 
 void route_tcp_node::update_state() {
 	route_tcp_node_state max_state = IDLE;
@@ -87,8 +75,6 @@ void route_tcp_node::update_state() {
 			max_state = state;
 		}
 	}
-
-
 
 	if (max_state == IDLE) {
 		if (get_source_event_queue().size() != 0) {
@@ -339,7 +325,7 @@ void route_tcp::event_trigger() {
 			route_tcp_node* final_destination_node= &get_node_array()[final_destination_node_id];
 
 			get_node_array()[origin_source_node_id].add_source_event(
-				new route_tcp_event(origin_source_node, final_destination_node)
+				new route_tcp_route_event(origin_source_node, final_destination_node)
 				);
 			s_logger << "TTI: " << left << setw(3) << context::get_context()->get_tti() << ",  trigger[" << left << setw(3) << origin_source_node_id << ", " << left << setw(3) << final_destination_node_id << "]" << endl;
 
@@ -353,6 +339,7 @@ void route_tcp::process_syn_connection() {
 		if (get_node_array()[source_node_id].get_cur_state() == SOURCE_SEND_SYN) {
 			int relay_node_id = get_node_array()[source_node_id].source_select_relay_node();
 			if (relay_node_id == -1) {
+				//没有可用的中继节点
 				get_node_array()[source_node_id].add_next_posible_state(SOURCE_SEND_SYN);
 				continue;
 			}
@@ -382,7 +369,10 @@ void route_tcp::process_ack_connection() {
 			/*此时relay节点可能处于空闲状态，因为没有进行判断(任意状态下都能进行ack应答)*/
 		}
 		else {
-			get_node_array()[accept_node_id].set_source_ack_state(ACCEPT);
+			//建立传输的link_event
+			int package_num = get_node_array()[accept_node_id].get_source_event_queue().front()->get_package_num();
+			route_tcp_link_event* link_event = new route_tcp_link_event(accept_node_id, relay_node_id, package_num);
+			get_node_array()[relay_node_id].add_relay_event(link_event);
 
 			get_node_array()[accept_node_id].add_next_posible_state(SOURCE_SENDING);
 			log(accept_node_id, relay_node_id, SOURCE,
@@ -395,27 +385,10 @@ void route_tcp::process_ack_connection() {
 		}
 
 		for (int reject_node_id : ack_response.second) {
-			get_node_array()[reject_node_id].set_source_ack_state(REJECT);
-
 			get_node_array()[reject_node_id].add_next_posible_state(SOURCE_SEND_SYN);
 			log(reject_node_id, relay_node_id, SOURCE,
 				get_node_array()[reject_node_id].get_cur_state(), SOURCE_SEND_SYN,
 				"process_ack_connection：收到拒收ack，准备再次发送syn");
-		}
-	}
-
-	//上下两个循环在一个TTI内完成，但是有先后顺序，发送ack在前，接收ack在后
-	//对ack状态为RECEIVE的node，建立事件逻辑层面的连接
-	for (int source_node_id = 0; source_node_id < route_tcp_node::s_node_count; source_node_id++) {
-		if (get_node_array()[source_node_id].get_cur_state() == SOURCE_RECEIVE_ACK) {
-			if (get_node_array()[source_node_id].get_source_ack_state() == ACCEPT) {
-				//获取队列第一个元素(不出队)，进行拷贝，与relay节点关联
-				route_tcp_event* cur_event = get_node_array()[source_node_id].get_source_event_queue().front()->clone();
-				int relay_node_id = get_node_array()[source_node_id].get_source_syn_node();
-				cur_event->set_current_node(&(get_node_array()[relay_node_id]));
-				get_node_array()[relay_node_id].add_relay_event(cur_event);
-				cur_event->reset();
-			}
 		}
 	}
 }
@@ -425,11 +398,11 @@ void route_tcp::process_transimit_connection() {
 		if (get_node_array()[relay_node_id].get_cur_state() == RELAY_RECEIVING) {
 			if (get_node_array()[relay_node_id].get_relay_event_queue().size() == 0)
 				cout << "relay_id: " << relay_node_id << endl;
-			route_tcp_event* cur_event = get_node_array()[relay_node_id].get_relay_event_queue().front();
-			cur_event->transimit();
-			int source_node_id = cur_event->get_source_node_id();
+			route_tcp_link_event* link_event = get_node_array()[relay_node_id].get_relay_event_queue().front();
+			link_event->transimit();
+			int source_node_id = link_event->get_source_node_id();
 
-			if (cur_event->is_curlink_finished()) {
+			if (link_event->is_finished()) {
 				get_node_array()[source_node_id].add_next_posible_state(SOURCE_LINK_RESPONSE);
 				log(source_node_id, relay_node_id, SOURCE,
 					get_node_array()[source_node_id].get_cur_state(), SOURCE_LINK_RESPONSE,
@@ -456,16 +429,16 @@ void route_tcp::process_transimit_connection() {
 void route_tcp::process_response_connection() {
 	for (int relay_node_id = 0; relay_node_id < route_tcp_node::s_node_count; relay_node_id++) {
 		if (get_node_array()[relay_node_id].get_cur_state() == RELAY_LINK_RESPONSE) {
-			route_tcp_event* cur_event = get_node_array()[relay_node_id].get_relay_event_queue().front();
-			if (!cur_event->is_curlink_finished())throw logic_error("error");
-			int source_node_id = cur_event->get_source_node_id();
+			route_tcp_link_event* link_event = get_node_array()[relay_node_id].get_relay_event_queue().front();
+			if (!link_event->is_finished())throw logic_error("error");
+			int source_node_id = link_event->get_source_node_id();
 
-			if (cur_event->get_is_curlink_loss()) {
-				get_node_array()[source_node_id].set_source_link_response_state(FAILURE);
+			get_node_array()[relay_node_id].remove_relay_event();//弹出
+
+			if (link_event->get_is_loss()) {
 				s_logger << "TTI: " << left << setw(3) << context::get_context()->get_tti() << ",  link[" << left << setw(3) << source_node_id << ", " << left << setw(3) << relay_node_id << "]: { FAILED }" << endl;
 
-				add_failed_event(cur_event);//添加到失败事件列表
-				get_node_array()[relay_node_id].remove_relay_event();//弹出
+				add_failed_event(link_event);//添加到失败事件列表
 
 				get_node_array()[source_node_id].add_next_posible_state(SOURCE_SEND_SYN);
 				log(source_node_id, relay_node_id, SOURCE,
@@ -477,24 +450,28 @@ void route_tcp::process_response_connection() {
 					"process_response_connection：丢包，准备进入空闲状态");
 			}
 			else {
-				get_node_array()[source_node_id].set_source_link_response_state(SUCCESS);
+				//成功传输，将route_event转移到新的节点
+				route_tcp_route_event * route_event = get_node_array()[source_node_id].get_source_event_queue().front()->clone();
+				route_event->set_current_node(&get_node_array()[relay_node_id]);
+
+				get_node_array()[source_node_id].remove_source_event();
+				get_node_array()[relay_node_id].add_source_event(route_event);
+
 				s_logger << "TTI: " << left << setw(3) << context::get_context()->get_tti() << ",  link[" << left << setw(3) << source_node_id << ", " << left << setw(3) << relay_node_id << "]: { SUCCEED }" << endl;
 
 				get_node_array()[source_node_id].add_next_posible_state(IDLE);
-				get_node_array()[source_node_id].remove_source_event();
 				log(source_node_id, relay_node_id, SOURCE,
 					get_node_array()[source_node_id].get_cur_state(), IDLE,
 					"process_response_connection：成功发送，准备进入空闲状态");
-				if (cur_event->is_all_finished()) {
-					add_successful_event(cur_event);//添加到成功事件列表
-					get_node_array()[relay_node_id].remove_relay_event();//弹出
+				if (route_event->is_finished()) {
+					add_successful_event(route_event);//添加到成功事件列表
+					get_node_array()[relay_node_id].remove_source_event();
 					get_node_array()[relay_node_id].add_next_posible_state(IDLE);
 					log(source_node_id, relay_node_id, RELAY,
 						get_node_array()[relay_node_id].get_cur_state(), IDLE,
 						"process_response_connection：整条链路完毕，准备进入空闲状态");
 				}
 				else {
-					get_node_array()[relay_node_id].transfer_event_from_relay_queue_to_source_queue();
 					get_node_array()[relay_node_id].add_next_posible_state(SOURCE_SEND_SYN);
 					log(source_node_id, relay_node_id, RELAY,
 						get_node_array()[relay_node_id].get_cur_state(), SOURCE_SEND_SYN,

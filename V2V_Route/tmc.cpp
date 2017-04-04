@@ -44,7 +44,7 @@ void tmc::statistic() {
 	success_event << "total success event: " << __route->get_successful_event_vec().size() << endl;
 
 
-	for (route_tcp_event* tcp_event : __route->get_successful_event_vec()) {
+	for (route_tcp_route_event* tcp_event : __route->get_successful_event_vec()) {
 		success_event << tcp_event->to_string();
 	}
 	success_event << endl;
