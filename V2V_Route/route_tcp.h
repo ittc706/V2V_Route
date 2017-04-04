@@ -11,11 +11,6 @@
 #include"context.h"
 #include"config.h"
 
-enum route_event_type {
-	SOURCE,
-	RELAY
-};
-
 enum route_response_state{
 	ACCEPT,
 	REJECT
@@ -62,44 +57,44 @@ private:
 	* 源节点
 	*/
 private:
-	route_tcp_node* const m_origin_source_node;
+	const int m_origin_source_node_id;
 public:
-	route_tcp_node* get_origin_source_node() { 
-		return m_origin_source_node; 
+	int get_origin_source_node_id() { 
+		return m_origin_source_node_id;
 	}
 
 	/*
 	* 目的节点
 	*/
 private:
-	route_tcp_node* const m_final_destination_node;
+	const int m_final_destination_node_id;
 public:
-	route_tcp_node* get_final_destination_node() { 
-		return m_final_destination_node; 
+	int get_final_destination_node_id() { 
+		return m_final_destination_node_id;
 	}
 
 	/*
 	* 当前节点(已正确传输到当前节点，即当前节点也在m_through_node_vec之中)
 	*/
 private:
-	route_tcp_node* m_current_node = nullptr;
+	int m_current_node_id = -1;
 public:
-	void set_current_node(route_tcp_node* t_current_node) { 
-		m_current_node = t_current_node; 
-		m_through_node_vec.push_back(m_current_node);
+	void set_current_node_id(int t_current_node_id) { 
+		m_current_node_id = t_current_node_id;
+		m_through_node_id_vec.push_back(m_current_node_id);
 	}
-	route_tcp_node* get_current_node() { 
-		return m_current_node; 
+	int get_current_node_id() { 
+		return m_current_node_id;
 	}
 
 	/*
 	* 经历的节点列表(只包含成功传输的)
 	*/
 private:
-	std::vector<route_tcp_node*> m_through_node_vec;
+	std::vector<int> m_through_node_id_vec;
 public:
-	const std::vector<route_tcp_node*>& get_through_node_vec() {
-		return m_through_node_vec;
+	const std::vector<int>& get_through_node_vec() {
+		return m_through_node_id_vec;
 	}
 
 
@@ -107,7 +102,7 @@ public:
 	* 整个从源节点到目的节点是否传递成功
 	*/
 	bool is_finished() { 
-		return m_current_node == m_final_destination_node; 
+		return m_current_node_id == m_final_destination_node_id; 
 	}
 
 	/*
@@ -133,12 +128,12 @@ public:
 	/*
 	* 构造函数，提供给事件触发模块调用
 	*/
-	route_tcp_route_event(route_tcp_node* t_source_node, route_tcp_node* t_destination_node) :
+	route_tcp_route_event(int t_source_node, int t_destination_node) :
 		m_event_id(s_event_count++), 
-		m_origin_source_node(t_source_node),
-		m_final_destination_node(t_destination_node),
+		m_origin_source_node_id(t_source_node),
+		m_final_destination_node_id(t_destination_node),
 		m_package_num(context::get_context()->get_tmc_config()->get_package_num()){
-		set_current_node(t_source_node);
+		set_current_node_id(t_source_node);
 	}
 
 	/*
@@ -151,7 +146,9 @@ public:
 	* 拷贝当前事件，拷贝前后event_id不变
 	* 当某一跳成功传输，但是标记成功与否的信令传输失败，则会造成多条链路，此时才会调用clone
 	*/
-	void transfer_to(route_tcp_node* t_node);
+	void transfer_to(int t_node_id) {
+		set_current_node_id(t_node_id);
+	}
 
 	/*
 	* 转为字符串
@@ -185,7 +182,7 @@ public:
 	* 即要发送的数据封装成IP数据包的数量，这些IP数据包丢失任意一个，那么整个数据包就算丢失
 	*/
 private:
-	int m_package_num;
+	const int m_package_num;
 
 	/*
 	* 标记本跳当前时刻传输的包编号
@@ -223,6 +220,69 @@ public:
 	void transimit();
 };
 
+class route_tcp_source_node {
+	friend class route_tcp_node;
+private:
+	route_tcp_source_node() {}
+	/*
+	* 待路由转发事件列表
+	* 当前节点作为source节点的事件队列，当且仅当：当前节点处于转发状态，并且触发信的事件，此时队列长度为2
+	* 其他任何时候队列中只有触发事件或者转发事件
+	*/
+private:
+	std::queue<route_tcp_route_event*> m_event_queue;
+public:
+	void offer_event(route_tcp_route_event* t_event) {
+		m_event_queue.push(t_event);
+	}
+	route_tcp_route_event* poll_event() {
+		route_tcp_route_event* temp = m_event_queue.front();
+		m_event_queue.pop();
+		return temp;
+	}
+	route_tcp_route_event* peek_event() {
+		return m_event_queue.front();
+	}
+};
+
+class route_tcp_relay_node {
+	friend class route_tcp_node;
+private:
+	route_tcp_relay_node() {}
+	/*
+	* 当前节点作为relay节点的事件队列
+	*/
+private:
+	std::queue<route_tcp_link_event*> m_event_queue;
+public:
+	void offer_event(route_tcp_link_event* t_event) {
+		m_event_queue.push(t_event);
+	}
+	route_tcp_link_event* poll_event() {
+		route_tcp_link_event* temp = m_event_queue.front();
+		m_event_queue.pop();
+		return temp;
+	}
+	route_tcp_link_event* peek_event() {
+		return m_event_queue.front();
+	}
+
+	/*
+	* 当前节点接收来自其他车辆的syn请求的列表(上一个tti)
+	*/
+private:
+	std::vector<int> m_pre_syn_node_vec;
+
+	/*
+	* 当前节点接收来自其他车辆的syn请求的列表(当前tti)
+	*/
+private:
+	std::vector<int> m_syn_node_vec;
+public:
+	void add_relay_syn_node(int t_node_id) {
+		m_syn_node_vec.push_back(t_node_id);
+	}
+};
 
 class route_tcp_node {
 	friend class route_tcp;
@@ -233,8 +293,7 @@ private:
 
 	static std::ofstream s_logger;
 
-	static void log(route_tcp_node* t_node);
-
+	static void log_state_update(route_tcp_node* t_node);
 	/*
 	* 正在发送(强调一下:发状态的节点)的node节点
 	* 外层下标为pattern编号
@@ -242,6 +301,25 @@ private:
 	static std::vector<std::set<route_tcp_node*>> s_node_per_pattern;
 
 private:
+	/*
+	*  指向代表该节点source状态的对象
+	*/
+	route_tcp_source_node* m_source_node;
+	route_tcp_source_node* get_source_node() {
+		return m_source_node;
+	}
+
+	/*
+	*  指向代表该节点relay状态的对象
+	*/
+	route_tcp_relay_node* m_relay_node;
+	route_tcp_relay_node* get_relay_node(){
+		return m_relay_node;
+	}
+
+	/*
+	* 节点id
+	*/
 	const int m_id = s_node_count++;
 public:
 	int get_id() {
@@ -261,79 +339,31 @@ public:
 		return m_adjacent_list;
 	}
 
-
 	/*
 	* 节点当前状态状态
 	*/
 private:
 	route_tcp_node_state m_cur_state = IDLE;
-	void set_cur_state(route_tcp_node_state t_cur_state) { m_cur_state = t_cur_state; }
+	void set_cur_state(route_tcp_node_state t_cur_state) {
+		m_cur_state = t_cur_state; 
+	}
 public:
-	route_tcp_node_state get_cur_state() { return m_cur_state; }
+	route_tcp_node();
+
+	/*
+	* 返回节点当前时刻的状态
+	*/
+	route_tcp_node_state get_cur_state() {
+		return m_cur_state; 
+	}
 
 	/*
 	* 节点下一刻可能的状态集合
 	*/
 private:
-	std::set<route_tcp_node_state> m_next_posible_state_set;
-	void add_next_posible_state(route_tcp_node_state t_next_state) { 
-		m_next_posible_state_set.insert(t_next_state);
-	}
-
-private:
-	/*
-	* 当前节点作为source节点的事件队列，当且仅当：当前节点处于转发状态，并且触发信的事件，此时队列长度为2
-	* 其他任何时候队列中只有触发事件或者转发事件
-	*/
-	std::queue<route_tcp_route_event*> m_source_event_queue;
-	void add_source_event(route_tcp_route_event* t_event) {
-		m_source_event_queue.push(t_event);
-	}
-	void remove_source_event() {
-		m_source_event_queue.pop();
-	}
-	const std::queue<route_tcp_route_event*>& get_source_event_queue() {
-		return m_source_event_queue;
-	}
-	/*
-	* 当前节点作为relay节点的事件队列
-	*/
-	std::queue<route_tcp_link_event*> m_relay_event_queue;
-	void add_relay_event(route_tcp_link_event* t_event) {
-		m_relay_event_queue.push(t_event);
-	}
-	void remove_relay_event() {
-		m_relay_event_queue.pop();
-	}
-	const std::queue<route_tcp_link_event*>& get_relay_event_queue() {
-		return m_relay_event_queue;
-	}
-
-	/*
-	* 当前节点(作为source节点)请求syn的节点(即relay节点)
-	* 该状态由select_relay_node()方法进行维护
-	*/
-private:
-	int m_source_syn_node;
-public:
-	int get_source_syn_node() {
-		return m_source_syn_node;
-	}
-
-	/*
-	* 当前节点(作为relay节点)接收来自其他车辆的syn请求的列表(当前tti)
-	*/
-private:
-	std::vector<int> m_relay_pre_syn_node_vec;
-
-	/*
-	* 当前节点(作为relay节点)接收来自其他车辆的syn请求的列表(当前tti)
-	*/
-private:
-	std::vector<int> m_relay_syn_node_vec;
-public:
-	void add_relay_syn_node(int t_node_id) {
-		m_relay_syn_node_vec.push_back(t_node_id);
+	std::set<route_tcp_node_state> m_next_possible_state_set;
+	void add_next_possible_state(route_tcp_node_state t_next_state) { 
+		m_next_possible_state_set.insert(t_next_state);
 	}
 
 public:
@@ -371,10 +401,13 @@ private:
 public:
 	static std::string state_to_string(route_tcp_node_state state);
 private:
-	static void log(int source_node_id, int relay_node_id, 
-		route_event_type event_type, route_tcp_node_state cur_state, 
+	static void log_possible_state(int source_node_id, int relay_node_id, 
+		int cur_node_id, route_tcp_node_state cur_state, 
 		route_tcp_node_state next_state, std::string description);
 
+	static void log_event_trigger(int t_origin_node_id, int t_fianl_destination_node_id);
+
+	static void log_link_event_state(int t_source_node_id, int t_relay_node_id, std::string t_description);
 private:
 	route_tcp_node* m_node_array;
 public:
