@@ -22,11 +22,11 @@ enum route_transimit_state {
 };
 
 enum route_tcp_pattern_state {
-	TO_BE_SEND,//将要发送
-	SENDING,//发送状态
-	TO_BE_RECEIVE,//将要接收
-	RECEIVING,//接受状态
-	IDLE//空闲状态
+	IDLE = -3,//空闲状态
+	TO_BE_SEND = -2,//将要发送
+	TO_BE_RECEIVE = -1,//将要接收
+	SENDING = 1,//发送状态
+	RECEIVING = 2,//接受状态
 };
 
 
@@ -267,12 +267,9 @@ public:
 
 private:
 	/*
-	* 发送ack请求时，会创建link_event，并将其添加到该结构中
-	* 并在下一tti进行传输
-	* 外层下标为pattern
-	* 仅用于该节点作为relay时(同时维护该链路source节点的m_pattern_state)
+	* 握手成功后，创建link_event，添加到relay节点的该结构中，用于下个tti传输
 	*/
-	std::vector<route_tcp_link_event*> m_tobe_link_transimit;
+	std::vector<route_tcp_link_event*> m_next_round_link_event;
 
 	/*
 	* 当前节点，当前时刻，每个pattern的使用情况
@@ -283,31 +280,36 @@ private:
 	std::vector<std::pair<route_tcp_pattern_state, route_tcp_link_event*>> m_pattern_state;
 
 	/*
-	* 当前节点，每个频段上收到来自其他车辆的syn请求
+	* 当前节点，上个tti，每个频段上收到来自其他车辆的syn请求
 	*/
 private:
-	std::vector<std::vector<int>> m_syn_request_per_pattern;
+	std::vector<std::vector<int>> m_last_round_request_per_pattern;
 
 private:
 	/*
 	* 本次tti收到的syn请求，将于下个tti进行ack处理
 	*/
-	std::vector<std::vector<int>> m_tobe_syn_request_per_pattern;
+	std::vector<std::vector<int>> m_syn_request_per_pattern;
 public:
 	//添加syn请求
 	void add_syn_request(int t_pattern_idx, int t_source_node_id) {
-		m_tobe_syn_request_per_pattern[t_pattern_idx].push_back(t_source_node_id);
+		m_syn_request_per_pattern[t_pattern_idx].push_back(t_source_node_id);
 	}
 
 	/*
-	* 保存上一次请求的relay_node_id以及pattern_idx
-	* (-1,-1)则是无效状态
-	* 如果缓存不为空，说明该节点正在等待ack！！！
+	* (-1,-1)状态说明需要发送sync
+	* 在发送syn时，进行赋值，并且在被relay节点reject后重置，在传输完毕后重置
+	* 由于一个节点在同一个时刻只能发送一个事件，因此不用分pattern
 	*/
 private:
 	std::pair<int, int> m_select_cache;
 public:
-	void clear_select_cache() {
+	//是否已经发送syn，即syn是否有效
+	bool is_already_send_syn() {
+		return m_select_cache.first != -1 && m_select_cache.second != -1;
+	}
+	//重置syn状态
+	void reset_syn_state() {
 		m_select_cache.first = -1;
 		m_select_cache.second = -1;
 	}
