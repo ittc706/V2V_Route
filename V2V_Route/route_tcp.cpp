@@ -37,8 +37,6 @@ int route_tcp_node::s_node_count = 0;
 
 default_random_engine route_tcp_node::s_engine;
 
-ofstream route_tcp_node::s_logger;
-
 std::vector<std::set<route_tcp_node*>> route_tcp_node::s_node_per_pattern;
 
 route_tcp_node::route_tcp_node() {
@@ -98,20 +96,53 @@ pair<int, int> route_tcp_node::select_relay_information() {
 
 default_random_engine route_tcp::s_engine;
 
-ofstream route_tcp::s_logger;
+ofstream route_tcp::s_logger_pattern;
+ofstream route_tcp::s_logger_link;
+ofstream route_tcp::s_logger_event;
 
-void route_tcp::log_event_trigger(int t_origin_node_id, int t_fianl_destination_node_id) {
-	s_logger << "TTI[" << left << setw(3) << context::get_context()->get_tti() << "] - ";
-	s_logger << "trigger[" << left << setw(3) << t_origin_node_id << ", ";
-	s_logger << left << setw(3) << t_fianl_destination_node_id << "]" << endl;
+void route_tcp::log_node_pattern(int t_source_node_id,
+	int t_relay_node_id,
+	int t_cur_node_id,
+	int t_pattern_idx,
+	route_tcp_pattern_state t_from_pattern_state,
+	route_tcp_pattern_state t_to_pattern_state,
+	string t_description) {
+	s_logger_pattern << "TTI[" << left << setw(3) << context::get_context()->get_tti() << "] - ";
+	s_logger_pattern << "link[" << left << setw(3) << t_source_node_id << ", ";
+	s_logger_pattern << left << setw(3) << t_relay_node_id << "] - ";
+	s_logger_pattern << "node[" << left << setw(3) << t_cur_node_id << "] - ";
+	s_logger_pattern << "pattern[" << t_pattern_idx << "] - ";
+	s_logger_pattern << "[" << left << setw(15) << pattern_state_to_string(t_from_pattern_state) << " -> " << left << setw(15) << pattern_state_to_string(t_to_pattern_state) << "] - ";
+	s_logger_pattern << t_description << endl;
+}
+
+string route_tcp::pattern_state_to_string(route_tcp_pattern_state t_pattern_state) {
+	switch (t_pattern_state) {
+	case IDLE:
+		return "IDLE";
+	case TO_BE_SEND:
+		return "TO_BE_SEND";
+	case TO_BE_RECEIVE:
+		return "TO_BE_RECEIVE";
+	case SENDING:
+		return "SENDING";
+	case RECEIVING:
+		return "RECEIVING";
+	}
+}
+
+void route_tcp::log_event(int t_origin_node_id, int t_fianl_destination_node_id) {
+	s_logger_event << "TTI[" << left << setw(3) << context::get_context()->get_tti() << "] - ";
+	s_logger_event << "trigger[" << left << setw(3) << t_origin_node_id << ", ";
+	s_logger_event << left << setw(3) << t_fianl_destination_node_id << "]" << endl;
 
 }
 
-void route_tcp::log_link_event_state(int t_source_node_id, int t_relay_node_id, std::string t_description) {
-	s_logger << "TTI[" << left << setw(3) << context::get_context()->get_tti() << "] - ";
-	s_logger << "link[" << left << setw(3) << t_source_node_id << ", ";
-	s_logger << left << setw(3) << t_relay_node_id << "] - ";
-	s_logger << "{" << t_description << "}" << endl;
+void route_tcp::log_link(int t_source_node_id, int t_relay_node_id, std::string t_description) {
+	s_logger_link << "TTI[" << left << setw(3) << context::get_context()->get_tti() << "] - ";
+	s_logger_link << "link[" << left << setw(3) << t_source_node_id << ", ";
+	s_logger_link << left << setw(3) << t_relay_node_id << "] - ";
+	s_logger_link << "{" << t_description << "}" << endl;
 }
 
 
@@ -125,12 +156,14 @@ void route_tcp::initialize() {
 	m_node_array = new route_tcp_node[vue_num];
 
 	if (__context->get_global_control_config()->get_platform() == Windows) {
-		s_logger.open("log\\route_tcp_log.txt");
-		route_tcp_node::s_logger.open("log\\route_tcp_node_state_log.txt");
+		s_logger_pattern.open("log\\route_tcp_pattern_log.txt");
+		s_logger_link.open("log\\route_tcp_link_log.txt");
+		s_logger_event.open("log\\route_tcp_event_log.txt");
 	}
 	else {
-		s_logger.open("log/route_tcp_log.txt");
-		route_tcp_node::s_logger.open("log/route_tcp_node_state_log.txt");
+		s_logger_pattern.open("log/route_tcp_pattern_log.txt");
+		s_logger_link.open("log/route_tcp_link_log.txt");
+		s_logger_event.open("log/route_tcp_event_log.txt");
 	}
 }
 
@@ -189,7 +222,7 @@ void route_tcp::event_trigger() {
 			get_node_array()[origin_source_node_id].offer_send_event_queue(
 				new route_tcp_route_event(origin_source_node_id, final_destination_node_id)
 			);
-			log_event_trigger(origin_source_node_id, final_destination_node_id);
+			log_event(origin_source_node_id, final_destination_node_id);
 		}
 	}
 }
@@ -201,17 +234,42 @@ void route_tcp::update_tobe() {
 		route_tcp_node& relay_node = get_node_array()[relay_node_id];
 		for (int pattern_idx = 0; pattern_idx < context::get_context()->get_rrm_config()->get_pattern_num(); pattern_idx++) {
 			if (relay_node.m_next_round_link_event[pattern_idx] != nullptr) {
+
+				route_tcp_pattern_state temp_relay_state = relay_node.m_pattern_state[pattern_idx].first;
 				if (relay_node.m_pattern_state[pattern_idx].first != TO_BE_RECEIVE) throw logic_error("error");
 				relay_node.m_pattern_state[pattern_idx].first = RECEIVING;
+				if (relay_node.m_pattern_state[pattern_idx].second != nullptr)throw logic_error("error");
+
 				relay_node.m_pattern_state[pattern_idx].second = relay_node.m_next_round_link_event[pattern_idx];
 				relay_node.m_next_round_link_event[pattern_idx] = nullptr;
 
 				int source_node_id = relay_node.m_pattern_state[pattern_idx].second->get_source_node_id();
 				route_tcp_node& source_node = get_node_array()[source_node_id];
+
+				route_tcp_pattern_state temp_source_state = source_node.m_pattern_state[pattern_idx].first;
 				if (source_node.m_pattern_state[pattern_idx].first != TO_BE_SEND) throw logic_error("error");
 				source_node.m_pattern_state[pattern_idx].first = SENDING;
 				if (source_node.m_pattern_state[pattern_idx].second != nullptr) throw logic_error("error");
 
+				log_node_pattern(
+					source_node_id,
+					relay_node_id,
+					source_node_id,
+					pattern_idx,
+					temp_source_state,
+					source_node.m_pattern_state[pattern_idx].first,
+					""
+				);
+
+				log_node_pattern(
+					source_node_id,
+					relay_node_id,
+					relay_node_id,
+					pattern_idx,
+					temp_relay_state,
+					relay_node.m_pattern_state[pattern_idx].first,
+					""
+				);
 			}
 		}
 	}
@@ -247,10 +305,20 @@ void route_tcp::send_syn() {
 		source_node.m_select_cache = select_res;
 
 		//在该频段上进行占位，避免在ack中被重用。否则发送频段可能和其他节点发来的syn占用同一频段
+		route_tcp_pattern_state temp_source_state = source_node.m_pattern_state[pattern_idx].first;
+		if (source_node.m_pattern_state[pattern_idx].first != IDLE)throw logic_error("error");
 		source_node.m_pattern_state[pattern_idx].first = TO_BE_SEND;
-		if (source_node.m_pattern_state[pattern_idx].second != nullptr) {
-			throw logic_error("error");
-		}
+		if (source_node.m_pattern_state[pattern_idx].second != nullptr)  throw logic_error("error");
+
+		log_node_pattern(
+			source_node_id,
+			relay_node_id,
+			source_node_id,
+			pattern_idx,
+			temp_source_state,
+			source_node.m_pattern_state[pattern_idx].first,
+			""
+		);
 
 		route_tcp_node& relay_node = get_node_array()[relay_node_id];
 		relay_node.add_syn_request(pattern_idx, source_node_id);
@@ -270,8 +338,21 @@ void route_tcp::send_ack() {
 				for (int rejected_source_node_id : relay_node.m_last_round_request_per_pattern[pattern_idx]) {
 					route_tcp_node& rejected_source_node = get_node_array()[rejected_source_node_id];
 					rejected_source_node.reset_syn_state();//清空缓存，好让该节点下一时刻继续发送syn请求
+
+					route_tcp_pattern_state temp_rejected_source_state = rejected_source_node.m_pattern_state[pattern_idx].first;
 					if (rejected_source_node.m_pattern_state[pattern_idx].first != TO_BE_SEND)throw logic_error("error");
 					rejected_source_node.m_pattern_state[pattern_idx].first = IDLE;
+					if (rejected_source_node.m_pattern_state[pattern_idx].second != nullptr)throw logic_error("error");
+
+					log_node_pattern(
+						rejected_source_node_id,
+						relay_node_id,
+						rejected_source_node_id,
+						pattern_idx,
+						temp_rejected_source_state,
+						rejected_source_node.m_pattern_state[pattern_idx].first,
+						""
+					);
 				}
 			}
 			else {
@@ -293,10 +374,21 @@ void route_tcp::send_ack() {
 				/*source节点已经在send_syn中将m_pattern_state置为TO_BE_SEND*/
 
 				//维护接收节点的pattern状态
+				route_tcp_pattern_state temp_relay_state = relay_node.m_pattern_state[pattern_idx].first;
+
 				if (relay_node.m_pattern_state[pattern_idx].first != IDLE)  throw logic_error("error");
-				
 				relay_node.m_pattern_state[pattern_idx].first = TO_BE_RECEIVE;
 				if (relay_node.m_pattern_state[pattern_idx].second != nullptr) throw logic_error("error");
+
+				log_node_pattern(
+					selected_source_node_id,
+					relay_node_id,
+					relay_node_id,
+					pattern_idx,
+					temp_relay_state,
+					relay_node.m_pattern_state[pattern_idx].first,
+					""
+				);
 
 				/*selected_source_node不要清除select_cache，避免在传输过程中，又请求其他车辆发送*/
 
@@ -305,8 +397,21 @@ void route_tcp::send_ack() {
 					if (rejected_source_node_id == selected_source_node_id)continue;
 					route_tcp_node& rejected_source_node = get_node_array()[rejected_source_node_id];
 					rejected_source_node.reset_syn_state();//清空缓存，好让该节点下一时刻继续发送syn请求
+
+					route_tcp_pattern_state temp_rejected_source_state = rejected_source_node.m_pattern_state[pattern_idx].first;
 					if (rejected_source_node.m_pattern_state[pattern_idx].first != TO_BE_SEND)throw logic_error("error");
 					rejected_source_node.m_pattern_state[pattern_idx].first = IDLE;
+					if (rejected_source_node.m_pattern_state[pattern_idx].second != nullptr)throw logic_error("error");
+
+					log_node_pattern(
+						rejected_source_node_id,
+						relay_node_id,
+						rejected_source_node_id,
+						pattern_idx,
+						temp_rejected_source_state,
+						rejected_source_node.m_pattern_state[pattern_idx].first,
+						""
+					);
 				}
 			}
 		}
@@ -320,28 +425,54 @@ void route_tcp::receive_data() {
 			if (relay_node.m_pattern_state[pattern_idx].first == RECEIVING) {
 				route_tcp_link_event* link_event = relay_node.m_pattern_state[pattern_idx].second;
 
-				int source_node_id = link_event->get_source_node_id();				
+				int source_node_id = link_event->get_source_node_id();
 				route_tcp_node& source_node = get_node_array()[source_node_id];
 				if (source_node.m_pattern_state[pattern_idx].first != SENDING)throw logic_error("error");
-				
+				if (source_node.m_pattern_state[pattern_idx].second != nullptr)throw logic_error("error");
+
 				link_event->transimit();
 
 				if (link_event->is_finished()) {
 					//维护收发节点的m_pattern状态
+					route_tcp_pattern_state temp_source_state = source_node.m_pattern_state[pattern_idx].first;
 					source_node.m_pattern_state[pattern_idx].first = IDLE;
-					if (source_node.m_pattern_state[pattern_idx].second != nullptr)throw logic_error("error");
 
+					route_tcp_pattern_state temp_relay_state = relay_node.m_pattern_state[pattern_idx].first;
 					relay_node.m_pattern_state[pattern_idx].first = IDLE;
 					relay_node.m_pattern_state[pattern_idx].second = nullptr;//<Warn>这里就直接把link_event删掉了
 
+					log_node_pattern(
+						source_node_id,
+						relay_node_id,
+						source_node_id,
+						pattern_idx,
+						temp_source_state,
+						source_node.m_pattern_state[pattern_idx].first,
+						""
+					);
+
+					log_node_pattern(
+						source_node_id,
+						relay_node_id,
+						relay_node_id,
+						pattern_idx,
+						temp_relay_state,
+						relay_node.m_pattern_state[pattern_idx].first,
+						""
+					);
+
 					if (link_event->get_is_loss()) {
 						//丢包了
+						log_link(source_node_id, relay_node_id, "FAILED");
+
 						add_failed_event(link_event);
 						//重置后重传
 						source_node.reset_syn_state();
 					}
 					else {
 						//没有丢包
+						log_link(source_node_id, relay_node_id, "SUCCESSFUL");
+
 						relay_node.offer_send_event_queue(source_node.poll_send_event_queue());
 						delete link_event;
 						//重置后重传

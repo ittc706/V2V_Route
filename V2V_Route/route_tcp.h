@@ -234,11 +234,6 @@ private:
 	static std::default_random_engine s_engine;
 
 	/*
-	* 日志输出流
-	*/
-	static std::ofstream s_logger;
-
-	/*
 	* 正在发送(强调一下:发状态的节点)的node节点
 	* 外层下标为pattern编号
 	*/
@@ -369,12 +364,26 @@ private:
 	/*
 	* 日志输出流
 	*/
-	static std::ofstream s_logger;
+	static std::ofstream s_logger_pattern;
+	static std::ofstream s_logger_link;
+	static std::ofstream s_logger_event;
 
-private:
-	static void log_event_trigger(int t_origin_node_id, int t_fianl_destination_node_id);
+	/*
+	* 记录日志
+	*/
+	static void log_node_pattern(int t_source_node_id, 
+		int t_relay_node_id, 
+		int t_cur_node_id, 
+		int t_pattern_idx, 
+		route_tcp_pattern_state t_from_pattern_state, 
+		route_tcp_pattern_state t_to_pattern_state, 
+		std::string t_description);
 
-	static void log_link_event_state(int t_source_node_id, int t_relay_node_id, std::string t_description);
+	static std::string pattern_state_to_string(route_tcp_pattern_state t_pattern_state);
+
+	static void log_event(int t_origin_node_id, int t_fianl_destination_node_id);
+
+	static void log_link(int t_source_node_id, int t_relay_node_id, std::string t_description);
 private:
 	/*
 	* 节点数组
