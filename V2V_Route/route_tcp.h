@@ -282,14 +282,6 @@ private:
 private:
 	std::vector<std::pair<route_tcp_pattern_state, route_tcp_link_event*>> m_pattern_state;
 
-private:
-	/*
-	* 发送response时，如果传输成功，将route_event添加到该结构
-	* 在下一刻刷新到m_send_event_queue中
-	* 外层下标为pattern
-	*/
-	std::vector<route_tcp_route_event*> m_tobe_relay;
-
 	/*
 	* 当前节点，每个频段上收到来自其他车辆的syn请求
 	*/

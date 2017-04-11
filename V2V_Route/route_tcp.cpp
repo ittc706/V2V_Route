@@ -59,11 +59,6 @@ route_tcp_node::route_tcp_node() {
 		context::get_context()->get_rrm_config()->get_pattern_num(),
 		nullptr
 		);
-
-	m_tobe_relay = vector<route_tcp_route_event*>(
-		context::get_context()->get_rrm_config()->get_pattern_num(),
-		nullptr
-		);
 }
 
 
@@ -302,7 +297,7 @@ void route_tcp::receive_data() {
 					}
 					else {
 						//Ã»ÓÐ¶ª°ü
-						relay_node.m_tobe_relay[pattern_idx] = source_node.poll_send_event_queue();
+						relay_node.offer_send_event_queue(source_node.poll_send_event_queue());
 						delete link_event;
 					}
 				}
@@ -332,29 +327,10 @@ void route_tcp::update_tobe() {
 		}
 	}
 
-	for (int source_node_id = 0; source_node_id < route_tcp_node::s_node_count; source_node_id++) {
-		route_tcp_node& source_node = get_node_array()[source_node_id];
-		for (int pattern_idx = 0; pattern_idx < source_node.m_tobe_relay.size(); pattern_idx++) {
-			if (source_node.m_tobe_relay[pattern_idx] == nullptr)continue;
-
-			route_tcp_route_event* route_event = source_node.m_tobe_relay[pattern_idx];
-			route_event->set_current_node_id(source_node_id);
-
-			if (route_event->is_finished()) {
-				add_successful_event(route_event);
-			}
-			else {
-				source_node.offer_send_event_queue(route_event);
-			}
-
-			source_node.m_tobe_relay[pattern_idx] = nullptr;
-		}
-	}
-
 	for (int relay_node_id = 0; relay_node_id < route_tcp_node::s_node_count; relay_node_id++) {
 		route_tcp_node& relay_node = get_node_array()[relay_node_id];
 		relay_node.m_syn_request_per_pattern.swap(relay_node.m_tobe_syn_request_per_pattern);
-		for (int pattern_idx = 0; pattern_idx < relay_node.m_tobe_relay.size(); pattern_idx++) {
+		for (int pattern_idx = 0; pattern_idx < relay_node.m_tobe_syn_request_per_pattern.size(); pattern_idx++) {
 			relay_node.m_tobe_syn_request_per_pattern[pattern_idx].clear();
 		}
 	}
