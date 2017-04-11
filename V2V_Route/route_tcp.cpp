@@ -6,6 +6,7 @@
 #include"context.h"
 #include"config.h"
 #include"gtt.h"
+#include"wt.h"
 #include"vue.h"
 #include"vue_physics.h"
 #include"function.h"
@@ -29,15 +30,27 @@ void route_tcp_link_event::transimit() {
 	if (++m_package_idx == m_package_num) {
 		m_is_finished = true;
 	}
-	double sinr = -1;
-	//<Warn>:sinr计算待补充，以及是否丢包字段的维护
+
+	double sinr = context::get_context()->get_wt()->calculate_sinr(
+		get_source_node_id(),
+		get_destination_node_id(),
+		get_pattern_idx(),
+		route_tcp_node::get_node_id_set(get_pattern_idx()));
+
+	if (sinr < context::get_context()->get_rrm_config()->get_drop_sinr_boundary()-100) {
+		m_is_loss = true;
+	}
 }
 
 int route_tcp_node::s_node_count = 0;
 
 default_random_engine route_tcp_node::s_engine;
 
-std::vector<std::set<route_tcp_node*>> route_tcp_node::s_node_per_pattern;
+std::vector<std::set<int>> route_tcp_node::s_node_id_per_pattern;
+
+const std::set<int>& route_tcp_node::get_node_id_set(int t_pattern_idx) {
+	return s_node_id_per_pattern[t_pattern_idx];
+}
 
 route_tcp_node::route_tcp_node() {
 	m_pattern_state = vector<pair<route_tcp_pattern_state, route_tcp_link_event*>>(
@@ -165,6 +178,8 @@ void route_tcp::initialize() {
 		s_logger_link.open("log/route_tcp_link_log.txt");
 		s_logger_event.open("log/route_tcp_event_log.txt");
 	}
+
+	route_tcp_node::s_node_id_per_pattern = vector<set<int>>(context::get_context()->get_rrm_config()->get_pattern_num());
 }
 
 void route_tcp::process_per_tti() {
@@ -230,6 +245,7 @@ void route_tcp::event_trigger() {
 
 
 void route_tcp::update_tobe() {
+	//将TO_BE_SEND/RECEIVE转换为SENDING/RECEIVING，同时将link_event从m_next_round_link_event转移到m_pattern_state中
 	for (int relay_node_id = 0; relay_node_id < route_tcp_node::s_node_count; relay_node_id++) {
 		route_tcp_node& relay_node = get_node_array()[relay_node_id];
 		for (int pattern_idx = 0; pattern_idx < context::get_context()->get_rrm_config()->get_pattern_num(); pattern_idx++) {
@@ -250,6 +266,10 @@ void route_tcp::update_tobe() {
 				if (source_node.m_pattern_state[pattern_idx].first != TO_BE_SEND) throw logic_error("error");
 				source_node.m_pattern_state[pattern_idx].first = SENDING;
 				if (source_node.m_pattern_state[pattern_idx].second != nullptr) throw logic_error("error");
+
+				//维护干扰列表，在传输完毕后，将其移除
+				if (route_tcp_node::s_node_id_per_pattern[pattern_idx].find(source_node_id) != route_tcp_node::s_node_id_per_pattern[pattern_idx].end()) throw logic_error("error");
+				route_tcp_node::s_node_id_per_pattern[pattern_idx].insert(source_node_id);
 
 				log_node_pattern(
 					source_node_id,
@@ -274,6 +294,7 @@ void route_tcp::update_tobe() {
 		}
 	}
 
+	//将上一tti收到的syn挪到m_last_round_request_per_pattern中，用于本次ack应答
 	for (int relay_node_id = 0; relay_node_id < route_tcp_node::s_node_count; relay_node_id++) {
 		route_tcp_node& relay_node = get_node_array()[relay_node_id];
 		relay_node.m_last_round_request_per_pattern.swap(relay_node.m_syn_request_per_pattern);
@@ -441,6 +462,9 @@ void route_tcp::receive_data() {
 					relay_node.m_pattern_state[pattern_idx].first = IDLE;
 					relay_node.m_pattern_state[pattern_idx].second = nullptr;//<Warn>这里就直接把link_event删掉了
 
+					if (route_tcp_node::s_node_id_per_pattern[pattern_idx].find(source_node_id) == route_tcp_node::s_node_id_per_pattern[pattern_idx].end()) throw logic_error("error");
+					route_tcp_node::s_node_id_per_pattern[pattern_idx].erase(source_node_id);
+
 					log_node_pattern(
 						source_node_id,
 						relay_node_id,
@@ -474,8 +498,13 @@ void route_tcp::receive_data() {
 						log_link(source_node_id, relay_node_id, "SUCCESSFUL");
 
 						relay_node.offer_send_event_queue(source_node.poll_send_event_queue());
+						relay_node.peek_send_event_queue()->set_current_node_id(relay_node_id);
+						if (relay_node.peek_send_event_queue()->is_finished()) {
+							add_successful_event(relay_node.poll_send_event_queue());
+						}
+
 						delete link_event;
-						//重置后重传
+						//重置
 						source_node.reset_syn_state();
 					}
 				}

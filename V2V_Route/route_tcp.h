@@ -237,7 +237,9 @@ private:
 	* 正在发送(强调一下:发状态的节点)的node节点
 	* 外层下标为pattern编号
 	*/
-	static std::vector<std::set<route_tcp_node*>> s_node_per_pattern;
+	static std::vector<std::set<int>> s_node_id_per_pattern;
+public:
+	static const std::set<int>& get_node_id_set(int t_pattern_idx);
 
 	/*
 	* 当前节点待发送车辆队列
