@@ -125,6 +125,7 @@
     <ClInclude Include="imta.h" />
     <ClInclude Include="route.h" />
     <ClInclude Include="route_tcp.h" />
+    <ClInclude Include="route_udp.h" />
     <ClInclude Include="system_control.h" />
     <ClInclude Include="tmc.h" />
     <ClInclude Include="vue.h" />
@@ -142,6 +143,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="route.cpp" />
     <ClCompile Include="route_tcp.cpp" />
+    <ClCompile Include="route_udp.cpp" />
     <ClCompile Include="system_control.cpp" />
     <ClCompile Include="tmc.cpp" />
     <ClCompile Include="vue.cpp" />

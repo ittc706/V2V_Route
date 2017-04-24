@@ -78,6 +78,8 @@ void global_control_config::load() {
 	if ((temp = get_config_loader()->get_param("route_mode")) != nullString) {
 		if (temp == "TCP")
 			set_route_mode(TCP);
+		else if (temp == "UDP")
+			set_route_mode(UDP);
 		else
 			throw logic_error("ConfigLoaderError");
 	}
@@ -86,7 +88,7 @@ void global_control_config::load() {
 
 	cout << "ntti: " << get_ntti() << endl;
 	cout << "gtt_mode: " << (get_gtt_mode() == URBAN ? "URBAN" : "HIGHSPEED") << endl;
-	cout << "route_mode: " << (get_route_mode() == TCP ? "TCP" : "ERROR") << endl;
+	cout << "route_mode: " << (get_route_mode() == TCP ? "TCP" : "UDP") << endl;
 	cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << endl;
 }
 
@@ -285,6 +287,12 @@ void tmc_config::load() {
 	else
 		throw logic_error("ConfigLoaderError");
 
+	if ((temp = get_config_loader()->get_param("Hello_tti")) != nullString) {
+		set_hello_tti(stoi(temp));
+	}
+	else
+		throw logic_error("ConfigLoaderError");
+
 	if ((temp = get_config_loader()->get_param("trigger_rate")) != nullString) {
 		set_trigger_rate(stod(temp));
 	}
@@ -295,7 +303,6 @@ void tmc_config::load() {
 	cout << "trigger_rate: " << get_trigger_rate() << endl;
 	cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << endl;
 }
-
 
 void route_config::load() {
 	//开始解析系统配置文件
@@ -313,6 +320,11 @@ void route_config::load() {
 	const string nullString("");
 	string temp;
 
+	if ((temp = get_config_loader()->get_param("interval")) != nullString) {
+		set_interval(stoi(temp));
+	}
+	else
+		throw logic_error("ConfigLoaderError");
 
 	cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << endl;
 }

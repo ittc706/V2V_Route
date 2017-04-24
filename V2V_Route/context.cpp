@@ -54,14 +54,17 @@ void context::read_configuration() {
 	set_gtt_config(gtt_config::gtt_config_bind_by_mode(get_global_control_config()->get_gtt_mode()));
 	set_rrm_config(new rrm_config());
 	set_tmc_config(new tmc_config());
+	set_route_config(new route_config());
 
 	get_gtt_config()->set_config_loader(get_config_loader());
 	get_rrm_config()->set_config_loader(get_config_loader());
 	get_tmc_config()->set_config_loader(get_config_loader());
+	get_route_config()->set_config_loader(get_config_loader());
 
 	get_gtt_config()->load();
 	get_rrm_config()->load();
 	get_tmc_config()->load();
+	get_route_config()->load();
 }
 
 void context::singleton_initialize() {

@@ -140,8 +140,6 @@ void gtt_urban::fresh_location() {
 			calculate_pl(vue_id1, vue_id2);
 		}
 	}
-
-	context::get_context()->get_route()->update_route_table_from_physics_level();
 }
 
 void gtt_urban::calculate_pl(int t_vue_id1, int t_vue_id2) {

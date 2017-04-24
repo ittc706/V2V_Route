@@ -1,6 +1,11 @@
 #pragma once
 #include"enumeration.h"
 
+enum route_transimit_state {
+	SUCCESS,
+	FAILURE
+};
+
 struct event_trigger_dto {
 	int source_vue_id;
 	int destination_vue_id;

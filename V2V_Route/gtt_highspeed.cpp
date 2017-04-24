@@ -155,8 +155,6 @@ void gtt_highspeed::fresh_location() {
 			calculate_pl(vue_id1, vue_id2);
 		}
 	}
-
-	context::get_context()->get_route()->update_route_table_from_physics_level();
 }
 
 

@@ -11,6 +11,7 @@ enum gtt_mode {
 };
 
 enum route_mode {
-	TCP
+	TCP,
+	UDP
 };
 

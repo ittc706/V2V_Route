@@ -16,11 +16,6 @@ enum route_response_state{
 	REJECT
 };
 
-enum route_transimit_state {
-	SUCCESS,
-	FAILURE
-};
-
 enum route_tcp_pattern_state {
 	IDLE = -3,//¿ÕÏÐ×´Ì¬
 	TO_BE_SEND = -2,//½«Òª·¢ËÍ

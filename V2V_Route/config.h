@@ -480,6 +480,19 @@ public:
 	}
 
 	/*
+	* Hello包数
+	*/
+private:
+	int m_hello_tti;
+	void set_hello_tti(int t_m_hello_tti) {
+		m_hello_tti = t_m_hello_tti;
+	}
+public:
+	int get_hello_tti() {
+		return m_hello_tti;
+	}
+
+	/*
 	*  事件触发概率
 	*/
 private:
@@ -518,7 +531,19 @@ public:
 	config_loader* get_config_loader() {
 		return m_config_loader;
 	}
+private:
+	/*
+	* Hello包发送平均周期
+	*/
 
+	int m_interval;
+	void set_interval(int t_interval) {
+		m_interval = t_interval;
+	}
+public:
+	int get_t_interval() {
+		return m_interval;
+	}
 
 	/*--------------------接口--------------------*/
 public:
