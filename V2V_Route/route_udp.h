@@ -261,11 +261,6 @@ class route_udp_node {
 private:
 
 	/*
-	* 距离当前时刻最近的上一次发送Hello包所用的pattern_id，数据事件传送均在该pattern上进行
-	*/
-	int m_pattern_to_transimit;
-
-	/*
 	* 下一次发送Hello包的时刻
 	*/
 	int m_tti_next_hello;
@@ -340,14 +335,14 @@ public:
 private:
 
 	//邻接表，pair的第一项为车辆id，第二项为上次接收到该车hello包的时间（TTI）
-	std::vector<pair<int, int>> m_adjacent_list;
+	std::vector<pair<int, adjacent_message>> m_adjacent_list;
 
 public:
 	//更新邻接表
-	void add_to_adjacent_list(int t_node_id) {
+	void add_to_adjacent_list(int t_node_id, adjacent_message config) {
 		context* __context = context::get_context();
-		pair<int,int> temp(t_node_id, __context->get_tti());
-		vector<pair<int, int>>::iterator it = m_adjacent_list.begin();
+		pair<int, adjacent_message> temp(t_node_id, config);
+		vector<pair<int, adjacent_message>>::iterator it = m_adjacent_list.begin();
 		while (it < m_adjacent_list.end() && it->first != t_node_id) {
 			++it;
 		}
@@ -357,12 +352,13 @@ public:
 		}
 		//如果车辆已经在邻接表里，则刷新该车辆的更新时间为当前时间
 		else {
-			it->second = __context->get_tti();
+			m_adjacent_list.erase(it);
+			m_adjacent_list.push_back(temp);
 		}
 	}
 
 	//<Warn>
-	const std::vector<pair<int,int>> get_adjacent_list() {
+	const std::vector<pair<int, adjacent_message>> get_adjacent_list() {
 		return m_adjacent_list;
 	}
 
@@ -417,7 +413,7 @@ private:
 
 	static void log_event(int t_origin_node_id, int t_fianl_destination_node_id);
 
-	static void log_link(int t_source_node_id, int t_relay_node_id, std::string t_description,std::string t_loss_reason);
+	static void log_link(int t_source_node_id, int t_relay_node_id, std::string t_description,std::string t_loss_reason, int last_time_pattern_id, int current_time_pattern_id);
 private:
 	/*
 	* 节点数组

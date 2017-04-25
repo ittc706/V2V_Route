@@ -96,9 +96,14 @@ pair<int, int> route_udp_node::select_relay_information() {
 	}
 	
 	//挑选频段，如果是发送Hello包，则在未占用的频段上随机选择，如果是发送数据包，则选择上次发送Hello包所使用的频段
-	if (final_destination_node_id != -1) {
-		if (m_pattern_state[m_pattern_to_transimit].first == IDLE_UDP) {
-			res.second = m_pattern_to_transimit;
+	if (final_destination_node_id != -1 && res.first != -1) {
+		int count = 0;
+		while (m_adjacent_list[count].first != res.first)
+		{
+			count++;
+		}
+		if (m_pattern_state[m_adjacent_list[count].second.pattern_id].first == IDLE_UDP) {
+			res.second = m_adjacent_list[count].second.pattern_id;
 		}
 	}
 	else {
@@ -158,12 +163,14 @@ void route_udp::log_event(int t_origin_node_id, int t_fianl_destination_node_id)
 
 }
 
-void route_udp::log_link(int t_source_node_id, int t_relay_node_id, std::string t_description,std::string t_loss_reason) {
+void route_udp::log_link(int t_source_node_id, int t_relay_node_id, std::string t_description,std::string t_loss_reason,int last_time_pattern_id,int current_time_pattern_id) {
 	s_logger_link << "TTI[" << left << setw(3) << context::get_context()->get_tti() << "] - ";
 	s_logger_link << "link[" << left << setw(3) << t_source_node_id << ", ";
 	s_logger_link << left << setw(3) << t_relay_node_id << "] - ";
 	s_logger_link << "{" << t_description << "}";
-	s_logger_link << "{" << t_loss_reason << "}" << endl;
+	s_logger_link << "{" << t_loss_reason << "}";
+	s_logger_link << last_time_pattern_id << ",";
+	s_logger_link << current_time_pattern_id << endl;
 }
 
 
@@ -219,8 +226,8 @@ void route_udp::update_route_table_from_physics_level() {
 		for (int vue_id_j = 0; vue_id_j < vue_num; vue_id_j++) {
 			if (vue_id_i == vue_id_j)continue;
 			if (vue_physics::get_distance(vue_id_i, vue_id_j) < 100) {
-				get_node_array()[vue_id_i].add_to_adjacent_list(vue_id_j);
-				get_node_array()[vue_id_j].add_to_adjacent_list(vue_id_i);
+				//get_node_array()[vue_id_i].add_to_adjacent_list(vue_id_j);
+				//get_node_array()[vue_id_j].add_to_adjacent_list(vue_id_i);
 			}
 		}
 	}
@@ -234,9 +241,9 @@ void route_udp::update_adjacent_list() {
 		context* __context = context::get_context();
 		int current_tti = __context->get_tti();
 		int interval = 1.5*__context->get_route_config()->get_t_interval();
-		vector<pair<int, int>>::iterator it= source_node.m_adjacent_list.begin();
+		vector<pair<int, adjacent_message>>::iterator it= source_node.m_adjacent_list.begin();
 		while (it != source_node.m_adjacent_list.end()) {
-			if ((current_tti - it->second) > interval) {
+			if ((current_tti - it->second.life_time) > interval) {
 				it = source_node.m_adjacent_list.erase(it);
 			}
 			else {
@@ -442,10 +449,6 @@ void route_udp::transmit_data() {
 
 				int pattern_idx = (*it)->m_pattern_idx;
 
-				if (source_node.m_send_event_queue.front()->get_route_event_type() == HEllO) {
-					source_node.m_pattern_to_transimit = pattern_idx;
-				}
-
 				//所有link_event处理完毕后，维护发送节点当前pattern状态
 				if (it == source_node.sending_link_event.end() - 1) {
 					source_node.m_pattern_state[pattern_idx].first = IDLE_UDP;
@@ -478,7 +481,16 @@ void route_udp::transmit_data() {
 						if ((*it)->m_loss_reason == UNKNOW) loss_reason = "UNKNOW";
 						else if ((*it)->m_loss_reason == LOW_SINR) loss_reason = "LOW_SINR";
 						else loss_reason = "DST_IS_SENDING";
-						log_link(source_node_id, (*it)->get_destination_node_id(), "FAILED",loss_reason);
+						int count = 0;
+						while (source_node.m_adjacent_list[count].first!= (*it)->get_destination_node_id())
+						{
+							count++;
+						}
+						int last_time_pattern_id = source_node.m_adjacent_list[count].second.pattern_id;
+						/*adjacent_message temp;
+						temp.pattern_id = pattern_idx;
+						temp.infer_node_id = route_udp_node::s_node_id_per_pattern[pattern_idx];*/
+						log_link(source_node_id, (*it)->get_destination_node_id(), "FAILED",loss_reason, last_time_pattern_id,pattern_idx);
 					}
 					if (source_node.m_send_event_queue.empty()) throw logic_error("error");
 
@@ -506,7 +518,7 @@ void route_udp::transmit_data() {
 						if ((*it)->m_loss_reason == UNKNOW) loss_reason = "UNKNOW";
 						else if ((*it)->m_loss_reason == LOW_SINR) loss_reason = "LOW_SINR";
 						else loss_reason = "DST_IS_SENDING";
-						log_link(source_node_id, (*it)->get_destination_node_id(), "SUCCESSFUL",loss_reason);
+						//log_link(source_node_id, (*it)->get_destination_node_id(), "SUCCESSFUL",loss_reason);
 					}
 					if (source_node.m_send_event_queue.empty()) throw logic_error("error");
 
@@ -536,7 +548,13 @@ void route_udp::transmit_data() {
 
 					//如果是Hello包，则将接收到包的源地址加入当前车辆邻接表
 					else {
-						destination_node.add_to_adjacent_list(source_node.get_id());
+						context* __context = context::get_context();
+						adjacent_message temp;
+						temp.pattern_id = pattern_idx;
+						temp.life_time = __context->get_tti();
+						temp.infer_node_id = route_udp_node::s_node_id_per_pattern[pattern_idx];
+						temp.sinr = 0;
+						destination_node.add_to_adjacent_list(source_node.get_id(),temp);
 
 						//所有link_event处理完毕后，删除route_event
 						if (it == source_node.sending_link_event.end() - 1) {
