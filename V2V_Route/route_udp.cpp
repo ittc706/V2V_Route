@@ -163,7 +163,7 @@ void route_udp::log_event(int t_origin_node_id, int t_fianl_destination_node_id)
 
 }
 
-void route_udp::log_link(int t_source_node_id, int t_relay_node_id, std::string t_description,std::string t_loss_reason,int last_time_pattern_id,int current_time_pattern_id) {
+void route_udp::log_link(int t_source_node_id, int t_relay_node_id, std::string t_description,std::string t_loss_reason,int last_time_pattern_id,int current_time_pattern_id,set<int> last_set,set<int> current_set) {
 	s_logger_link << "TTI[" << left << setw(3) << context::get_context()->get_tti() << "] - ";
 	s_logger_link << "link[" << left << setw(3) << t_source_node_id << ", ";
 	s_logger_link << left << setw(3) << t_relay_node_id << "] - ";
@@ -171,6 +171,18 @@ void route_udp::log_link(int t_source_node_id, int t_relay_node_id, std::string 
 	s_logger_link << "{" << t_loss_reason << "}";
 	s_logger_link << last_time_pattern_id << ",";
 	s_logger_link << current_time_pattern_id << endl;
+	set<int>::iterator it = last_set.begin();
+	while (it!=last_set.end())
+	{
+		s_logger_link << *it << ",";
+		it++;
+	}
+	set<int>::iterator _it = current_set.begin();
+	while (_it != current_set.end()) {
+		s_logger_link << *_it << ",";
+		_it++;
+	}
+	s_logger_link << endl;
 }
 
 
@@ -490,7 +502,7 @@ void route_udp::transmit_data() {
 						/*adjacent_message temp;
 						temp.pattern_id = pattern_idx;
 						temp.infer_node_id = route_udp_node::s_node_id_per_pattern[pattern_idx];*/
-						log_link(source_node_id, (*it)->get_destination_node_id(), "FAILED",loss_reason, last_time_pattern_id,pattern_idx);
+						log_link(source_node_id, (*it)->get_destination_node_id(), "FAILED",loss_reason, last_time_pattern_id,pattern_idx,source_node.m_adjacent_list[count].second.infer_node_id, route_udp_node::s_node_id_per_pattern[pattern_idx]);
 					}
 					if (source_node.m_send_event_queue.empty()) throw logic_error("error");
 
@@ -501,7 +513,7 @@ void route_udp::transmit_data() {
 						if (temp->get_route_event_type() == DATA) {
 							//如果是数据事件则进行记录
 							//<Warn>记录失败的数据传输事件
-							if (vue_physics::get_distance(source_node_id, destination_node.get_id()) < 500) {
+							if (vue_physics::get_distance(temp->get_origin_source_node_id(), temp->get_final_destination_node_id()) < 500) {
 								add_failed_route_event(source_node.peek_send_event_queue());
 							}
 						}
@@ -531,7 +543,8 @@ void route_udp::transmit_data() {
 						if (source_node.m_send_event_queue.front()->get_final_destination_node_id() == destination_node.get_id()) {
 
 							//OP1:记录route_event传送成功,并且永久保存到列表里
-							if (vue_physics::get_distance(source_node_id, destination_node.get_id()) < 500) {
+
+							if (vue_physics::get_distance(source_node.m_send_event_queue.front()->get_origin_source_node_id(), destination_node.get_id()) < 500) {
 								add_successful_route_event(source_node.poll_send_event_queue());
 							}
 							//OP2：只保留需要的数据，然后将route_event删除以释放空间

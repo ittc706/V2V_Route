@@ -413,7 +413,7 @@ private:
 
 	static void log_event(int t_origin_node_id, int t_fianl_destination_node_id);
 
-	static void log_link(int t_source_node_id, int t_relay_node_id, std::string t_description,std::string t_loss_reason, int last_time_pattern_id, int current_time_pattern_id);
+	static void log_link(int t_source_node_id, int t_relay_node_id, std::string t_description,std::string t_loss_reason, int last_time_pattern_id, int current_time_pattern_id,set<int> last_set, set<int> current_set);
 private:
 	/*
 	* 节点数组
