@@ -636,6 +636,11 @@ void route_udp::transmit_data() {
 
 		//所有完成的link_event 处理完毕后，删除所有link_event
 		if (all_link_event_finished == true) {
+			vector<route_udp_link_event*>::iterator it = source_node.sending_link_event.begin();
+			while (it != source_node.sending_link_event.end()) {
+				delete *it;
+				it++;
+			}
 			source_node.sending_link_event.clear();
 		}
 	}
