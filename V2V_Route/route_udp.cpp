@@ -39,6 +39,7 @@ void route_udp_link_event::transimit() {
 		get_destination_node_id(),
 		get_pattern_idx(),
 		route_udp_node::get_node_id_set(get_pattern_idx()));
+	sinr_per_tti.push_back(sinr);
 
 	if (sinr < context::get_context()->get_rrm_config()->get_drop_sinr_boundary()){
 		m_is_loss = true;
@@ -163,26 +164,60 @@ void route_udp::log_event(int t_origin_node_id, int t_fianl_destination_node_id)
 
 }
 
-void route_udp::log_link(int t_source_node_id, int t_relay_node_id, std::string t_description,std::string t_loss_reason,int last_time_pattern_id,int current_time_pattern_id,set<int> last_set,set<int> current_set) {
+void route_udp::log_link(int t_source_node_id, int t_relay_node_id, std::string t_description,std::string t_loss_reason,adjacent_message last_time,adjacent_message current_time) {
 	s_logger_link << "TTI[" << left << setw(3) << context::get_context()->get_tti() << "] - ";
 	s_logger_link << "link[" << left << setw(3) << t_source_node_id << ", ";
 	s_logger_link << left << setw(3) << t_relay_node_id << "] - ";
 	s_logger_link << "{" << t_description << "}";
-	s_logger_link << "{" << t_loss_reason << "}";
-	s_logger_link << last_time_pattern_id << ",";
-	s_logger_link << current_time_pattern_id << endl;
-	set<int>::iterator it = last_set.begin();
-	while (it!=last_set.end())
+	s_logger_link << "{" << t_loss_reason << "}" << endl;
+	context* __context = context::get_context();
 	{
-		s_logger_link << *it << ",";
-		it++;
+		s_logger_link << "Pattern Id:" << last_time.pattern_id << ";" << "Infer_Set:{";
+		set<int>::iterator it = last_time.infer_node_id.begin();
+		while (it != last_time.infer_node_id.end())
+		{
+			s_logger_link << *it << "(" << __context->get_vue_array()[*it].get_physics_level()->m_absx << "," << __context->get_vue_array()[*it].get_physics_level()->m_absy << "),";
+			it++;
+		}
+		s_logger_link << "};";
+		s_logger_link << "Send:（" << last_time.send_node_x << "," << last_time.send_node_y << "）,";
+		s_logger_link << "Receive:（" << last_time.receive_node_x << "," << last_time.receive_node_y << "）;";
+		s_logger_link << "Sinr:";
+		vector<double>::iterator it1 = last_time.sinr.begin();
+		while (it1 != last_time.sinr.end()) {
+			s_logger_link << *it1 << ",";
+			it1++;
+		}
+		s_logger_link << endl;
 	}
-	set<int>::iterator _it = current_set.begin();
-	while (_it != current_set.end()) {
-		s_logger_link << *_it << ",";
-		_it++;
+	
+	{
+		s_logger_link << "Pattern Id:" << current_time.pattern_id << ";" << "Infer_Set:{";
+		set<int>::iterator __it = current_time.infer_node_id.begin();
+		while (__it != current_time.infer_node_id.end())
+		{
+			s_logger_link << *__it << "(" << __context->get_vue_array()[*__it].get_physics_level()->m_absx << "," << __context->get_vue_array()[*__it].get_physics_level()->m_absy << "),";
+			__it++;
+		}
+		s_logger_link << "};";
+		s_logger_link << "Send:（" << current_time.send_node_x << "," << current_time.send_node_y << "）,";
+		s_logger_link << "Receive:（" << current_time.receive_node_x << "," << current_time.receive_node_y << "）";
+		s_logger_link << "Sinr:";
+		vector<double>::iterator __it1 = current_time.sinr.begin();
+		while (__it1 != current_time.sinr.end()) {
+			s_logger_link << *__it1 << ",";
+			__it1++;
+		}
+		s_logger_link << endl;
 	}
-	s_logger_link << endl;
+	if (abs(last_time.send_node_x - current_time.send_node_x) > 50 || abs(last_time.send_node_y - current_time.send_node_y) > 50 ||
+		abs(last_time.receive_node_x - current_time.receive_node_x) > 50 || abs(last_time.receive_node_y - current_time.receive_node_y)>50)
+	{
+		s_logger_link << "车辆卷绕，已运动出范围" << endl << endl;
+	}
+	else {
+		s_logger_link << endl;
+	}
 }
 
 
@@ -488,7 +523,7 @@ void route_udp::transmit_data() {
 
 				//判断是否丢包
 				if ((*it)->get_is_loss()) {
-					if (source_node.m_send_event_queue.front()->get_route_event_type() == DATA) {
+					if (source_node.m_send_event_queue.front()->get_route_event_type() == DATA) {//如果是数据事件，则记录该link_event
 						string loss_reason;
 						if ((*it)->m_loss_reason == UNKNOW) loss_reason = "UNKNOW";
 						else if ((*it)->m_loss_reason == LOW_SINR) loss_reason = "LOW_SINR";
@@ -498,25 +533,30 @@ void route_udp::transmit_data() {
 						{
 							count++;
 						}
-						int last_time_pattern_id = source_node.m_adjacent_list[count].second.pattern_id;
-						/*adjacent_message temp;
+						context* __context = context::get_context();
+						adjacent_message temp;
 						temp.pattern_id = pattern_idx;
-						temp.infer_node_id = route_udp_node::s_node_id_per_pattern[pattern_idx];*/
-						log_link(source_node_id, (*it)->get_destination_node_id(), "FAILED",loss_reason, last_time_pattern_id,pattern_idx,source_node.m_adjacent_list[count].second.infer_node_id, route_udp_node::s_node_id_per_pattern[pattern_idx]);
+						temp.sinr = (*it)->sinr_per_tti;
+						temp.infer_node_id = route_udp_node::s_node_id_per_pattern[pattern_idx];
+						temp.send_node_x = __context->get_vue_array()[destination_node.get_id()].get_physics_level()->m_absx;
+						temp.send_node_y = __context->get_vue_array()[destination_node.get_id()].get_physics_level()->m_absy;
+						temp.receive_node_x = __context->get_vue_array()[source_node_id].get_physics_level()->m_absx;
+						temp.receive_node_y = __context->get_vue_array()[source_node_id].get_physics_level()->m_absy;
+
+						log_link(source_node_id, (*it)->get_destination_node_id(), "FAILED",loss_reason,source_node.m_adjacent_list[count].second,temp);
+
+						if (vue_physics::get_distance(source_node.m_send_event_queue.front()->get_origin_source_node_id(), source_node.m_send_event_queue.front()->get_final_destination_node_id()) < 500) {//只记录收发相距小于500m的事件
+							if (abs(source_node.m_adjacent_list[count].second.send_node_x - temp.send_node_x) < 50 && abs(source_node.m_adjacent_list[count].second.send_node_y - temp.send_node_y) < 50 &&
+								abs(source_node.m_adjacent_list[count].second.receive_node_x - temp.receive_node_x) < 50 && abs(source_node.m_adjacent_list[count].second.receive_node_y - temp.receive_node_y)<50)//将卷绕的车辆排除在外
+							add_failed_route_event(source_node.peek_send_event_queue());
+						}
 					}
+
 					if (source_node.m_send_event_queue.empty()) throw logic_error("error");
 
 					//所有link_event处理完毕后，删除route_event
 					if (it == source_node.sending_link_event.end() - 1) {
 						route_udp_route_event* temp = source_node.m_send_event_queue.front();
-
-						if (temp->get_route_event_type() == DATA) {
-							//如果是数据事件则进行记录
-							//<Warn>记录失败的数据传输事件
-							if (vue_physics::get_distance(temp->get_origin_source_node_id(), temp->get_final_destination_node_id()) < 500) {
-								add_failed_route_event(source_node.peek_send_event_queue());
-							}
-						}
 
 						//删除route_event
 						source_node.m_send_event_queue.pop();
@@ -566,7 +606,12 @@ void route_udp::transmit_data() {
 						temp.pattern_id = pattern_idx;
 						temp.life_time = __context->get_tti();
 						temp.infer_node_id = route_udp_node::s_node_id_per_pattern[pattern_idx];
-						temp.sinr = 0;
+						temp.sinr = (*it)->sinr_per_tti;
+						temp.receive_node_x = __context->get_vue_array()[destination_node.get_id()].get_physics_level()->m_absx;
+						temp.receive_node_y = __context->get_vue_array()[destination_node.get_id()].get_physics_level()->m_absy;
+						temp.send_node_x = __context->get_vue_array()[source_node_id].get_physics_level()->m_absx;
+						temp.send_node_y = __context->get_vue_array()[source_node_id].get_physics_level()->m_absy;
+
 						destination_node.add_to_adjacent_list(source_node.get_id(),temp);
 
 						//所有link_event处理完毕后，删除route_event

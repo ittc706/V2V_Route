@@ -31,9 +31,10 @@ enum route_udp_link_event_loss_reason {
 
 struct adjacent_message {
 	int pattern_id;
-	double sinr;
+	std::vector<double> sinr;
 	std::set<int> infer_node_id;
 	int life_time;
+	double send_node_x, send_node_y, receive_node_x, receive_node_y;
 };
 
 /*
@@ -166,6 +167,11 @@ class route_udp_link_event {
 
 
 private:
+
+	/*
+	* 该link_evnent的SINR，传输需要几个TTI，则输出几个TTI上的SINR
+	*/
+	vector<double> sinr_per_tti;
 
 	/*
 	* 该link_evnent传输失败的原因
@@ -413,7 +419,7 @@ private:
 
 	static void log_event(int t_origin_node_id, int t_fianl_destination_node_id);
 
-	static void log_link(int t_source_node_id, int t_relay_node_id, std::string t_description,std::string t_loss_reason, int last_time_pattern_id, int current_time_pattern_id,set<int> last_set, set<int> current_set);
+	static void log_link(int t_source_node_id, int t_relay_node_id, std::string t_description,std::string t_loss_reason, adjacent_message last_time, adjacent_message current_time);
 private:
 	/*
 	* 节点数组

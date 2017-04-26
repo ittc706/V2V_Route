@@ -93,7 +93,8 @@ double wt::calculate_sinr(int t_send_vue_id, int t_receive_vue_id, int t_pattern
 	int snr_index = closest(*m_qpsk_mi, ave_mi);
 	sinreff = 0.5*(snr_index - 40);
 
-	return sinreff;
+	//<Warn>当没有小尺度衰落时，各个子载波上的SINR都是一样的，故算术平均为每个子载波上的SINR
+	return sinr[0];
 }
 
 

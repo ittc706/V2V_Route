@@ -37,3 +37,5 @@
 # version_2017_4_24(DEBUG)
 
 # version_2017_4_24(DEBUG)
+
+# version_2017_4_26(增加了输出到日志的信息)
