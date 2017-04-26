@@ -35,6 +35,7 @@ struct adjacent_message {
 	std::set<int> infer_node_id;
 	int life_time;
 	double send_node_x, send_node_y, receive_node_x, receive_node_y;
+	double pl;
 };
 
 /*
@@ -431,6 +432,24 @@ public:
 	}
 
 private:
+
+	/*
+	* 成功/失败传输的事件个数
+	*/
+	int m_success_route_event_num = 0;
+
+	int m_failed_route_event_num = 0;
+
+public:
+
+	int get_success_route_event_num(){
+		return m_success_route_event_num;
+	}
+	int get_failed_route_event_num() {
+		return m_failed_route_event_num;
+	}
+
+private:	
 	/*
 	* 成功/失败传输的事件
 	*/

@@ -53,11 +53,11 @@ void tmc::statistic() {
 	}
 	else {
 		route_udp* __route = (route_udp*)(__context->get_route());
-		success_route_event << "total success event: " << __route->get_successful_route_event_vec().size() << endl;
-		failed_route_event << "total failed event: " << __route->get_failed_route_event_vec().size() << endl;
-		for (route_udp_route_event* udp_event : __route->get_successful_route_event_vec()) {
+		success_route_event << "total success event: " << __route->get_success_route_event_num() << endl;
+		failed_route_event << "total failed event: " << __route->get_failed_route_event_num() << endl;
+		/*for (route_udp_route_event* udp_event : __route->get_successful_route_event_vec()) {
 			success_route_event << udp_event->to_string();
-		}
+		}*/
 	}
 	
 	success_route_event << endl;

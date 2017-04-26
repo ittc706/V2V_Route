@@ -188,6 +188,7 @@ void route_udp::log_link(int t_source_node_id, int t_relay_node_id, std::string 
 			s_logger_link << *it1 << ",";
 			it1++;
 		}
+		s_logger_link << "PL:" << -10*log10(last_time.pl);
 		s_logger_link << endl;
 	}
 	
@@ -197,6 +198,7 @@ void route_udp::log_link(int t_source_node_id, int t_relay_node_id, std::string 
 		while (__it != current_time.infer_node_id.end())
 		{
 			s_logger_link << *__it << "(" << __context->get_vue_array()[*__it].get_physics_level()->m_absx << "," << __context->get_vue_array()[*__it].get_physics_level()->m_absy << "),";
+			s_logger_link << "PL:" << -10*log10(vue_physics::get_pl(*__it, t_relay_node_id)) << ",";
 			__it++;
 		}
 		s_logger_link << "};";
@@ -208,6 +210,7 @@ void route_udp::log_link(int t_source_node_id, int t_relay_node_id, std::string 
 			s_logger_link << *__it1 << ",";
 			__it1++;
 		}
+		s_logger_link << "PL:" << -10*log10(current_time.pl);
 		s_logger_link << endl;
 	}
 	if (abs(last_time.send_node_x - current_time.send_node_x) > 50 || abs(last_time.send_node_y - current_time.send_node_y) > 50 ||
@@ -523,32 +526,34 @@ void route_udp::transmit_data() {
 
 				//判断是否丢包
 				if ((*it)->get_is_loss()) {
-					if (source_node.m_send_event_queue.front()->get_route_event_type() == DATA) {//如果是数据事件，则记录该link_event
-						string loss_reason;
-						if ((*it)->m_loss_reason == UNKNOW) loss_reason = "UNKNOW";
-						else if ((*it)->m_loss_reason == LOW_SINR) loss_reason = "LOW_SINR";
-						else loss_reason = "DST_IS_SENDING";
-						int count = 0;
-						while (source_node.m_adjacent_list[count].first!= (*it)->get_destination_node_id())
-						{
-							count++;
-						}
-						context* __context = context::get_context();
-						adjacent_message temp;
-						temp.pattern_id = pattern_idx;
-						temp.sinr = (*it)->sinr_per_tti;
-						temp.infer_node_id = route_udp_node::s_node_id_per_pattern[pattern_idx];
-						temp.send_node_x = __context->get_vue_array()[destination_node.get_id()].get_physics_level()->m_absx;
-						temp.send_node_y = __context->get_vue_array()[destination_node.get_id()].get_physics_level()->m_absy;
-						temp.receive_node_x = __context->get_vue_array()[source_node_id].get_physics_level()->m_absx;
-						temp.receive_node_y = __context->get_vue_array()[source_node_id].get_physics_level()->m_absy;
-
-						log_link(source_node_id, (*it)->get_destination_node_id(), "FAILED",loss_reason,source_node.m_adjacent_list[count].second,temp);
-
+					if (source_node.m_send_event_queue.front()->get_route_event_type() == DATA) {//如果是数据事件，且收发距离小于500m，则记录该link_event
 						if (vue_physics::get_distance(source_node.m_send_event_queue.front()->get_origin_source_node_id(), source_node.m_send_event_queue.front()->get_final_destination_node_id()) < 500) {//只记录收发相距小于500m的事件
+							string loss_reason;
+							if ((*it)->m_loss_reason == UNKNOW) loss_reason = "UNKNOW";
+							else if ((*it)->m_loss_reason == LOW_SINR) loss_reason = "LOW_SINR";
+							else loss_reason = "DST_IS_SENDING";
+							int count = 0;
+							while (source_node.m_adjacent_list[count].first != (*it)->get_destination_node_id())
+							{
+								count++;
+							}
+							context* __context = context::get_context();
+							adjacent_message temp;
+							temp.pattern_id = pattern_idx;
+							temp.sinr = (*it)->sinr_per_tti;
+							temp.infer_node_id = route_udp_node::s_node_id_per_pattern[pattern_idx];
+							temp.send_node_x = __context->get_vue_array()[destination_node.get_id()].get_physics_level()->m_absx;
+							temp.send_node_y = __context->get_vue_array()[destination_node.get_id()].get_physics_level()->m_absy;
+							temp.receive_node_x = __context->get_vue_array()[source_node_id].get_physics_level()->m_absx;
+							temp.receive_node_y = __context->get_vue_array()[source_node_id].get_physics_level()->m_absy;
+							temp.pl = vue_physics::get_pl(source_node_id, destination_node.get_id());
+
+							log_link(source_node_id, (*it)->get_destination_node_id(), "FAILED", loss_reason, source_node.m_adjacent_list[count].second, temp);
+
 							if (abs(source_node.m_adjacent_list[count].second.send_node_x - temp.send_node_x) < 50 && abs(source_node.m_adjacent_list[count].second.send_node_y - temp.send_node_y) < 50 &&
-								abs(source_node.m_adjacent_list[count].second.receive_node_x - temp.receive_node_x) < 50 && abs(source_node.m_adjacent_list[count].second.receive_node_y - temp.receive_node_y)<50)//将卷绕的车辆排除在外
-							add_failed_route_event(source_node.peek_send_event_queue());
+								abs(source_node.m_adjacent_list[count].second.receive_node_x - temp.receive_node_x) < 50 && abs(source_node.m_adjacent_list[count].second.receive_node_y - temp.receive_node_y) < 50)//将卷绕的车辆排除在外
+								//add_failed_route_event(source_node.peek_send_event_queue());
+								m_failed_route_event_num++;
 						}
 					}
 
@@ -560,7 +565,8 @@ void route_udp::transmit_data() {
 
 						//删除route_event
 						source_node.m_send_event_queue.pop();
-						//delete temp;
+						//if (source_node.m_send_event_queue.front()->get_route_event_type() == HEllO) delete temp;
+						delete temp;
 					}
 				}
 
@@ -585,12 +591,14 @@ void route_udp::transmit_data() {
 							//OP1:记录route_event传送成功,并且永久保存到列表里
 
 							if (vue_physics::get_distance(source_node.m_send_event_queue.front()->get_origin_source_node_id(), destination_node.get_id()) < 500) {
-								add_successful_route_event(source_node.poll_send_event_queue());
+								//add_successful_route_event(source_node.poll_send_event_queue());
+								m_success_route_event_num++;
 							}
+
 							//OP2：只保留需要的数据，然后将route_event删除以释放空间
-							//route_udp_route_event* temp = source_node.m_send_event_queue.front();
-							//source_node.m_send_event_queue.pop();
-							//delete temp;
+							route_udp_route_event* temp = source_node.m_send_event_queue.front();
+							source_node.m_send_event_queue.pop();
+							delete temp;
 						}
 
 						else {
@@ -611,6 +619,7 @@ void route_udp::transmit_data() {
 						temp.receive_node_y = __context->get_vue_array()[destination_node.get_id()].get_physics_level()->m_absy;
 						temp.send_node_x = __context->get_vue_array()[source_node_id].get_physics_level()->m_absx;
 						temp.send_node_y = __context->get_vue_array()[source_node_id].get_physics_level()->m_absy;
+						temp.pl = vue_physics::get_pl(destination_node.get_id(), source_node_id);
 
 						destination_node.add_to_adjacent_list(source_node.get_id(),temp);
 
