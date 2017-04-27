@@ -165,6 +165,10 @@ void route_udp::log_event(int t_origin_node_id, int t_fianl_destination_node_id)
 }
 
 void route_udp::log_link(int t_source_node_id, int t_relay_node_id, std::string t_description,std::string t_loss_reason,adjacent_message last_time,adjacent_message current_time) {
+	string lost_reason1 = "干扰";
+	string lost_reason2 = "连接性不好";
+	bool lost_reason = false;
+	
 	s_logger_link << "TTI[" << left << setw(3) << context::get_context()->get_tti() << "] - ";
 	s_logger_link << "link[" << left << setw(3) << t_source_node_id << ", ";
 	s_logger_link << left << setw(3) << t_relay_node_id << "] - ";
@@ -199,6 +203,7 @@ void route_udp::log_link(int t_source_node_id, int t_relay_node_id, std::string 
 		{
 			s_logger_link << *__it << "(" << __context->get_vue_array()[*__it].get_physics_level()->m_absx << "," << __context->get_vue_array()[*__it].get_physics_level()->m_absy << "),";
 			s_logger_link << "PL:" << -10*log10(vue_physics::get_pl(*__it, t_relay_node_id)) << ",";
+			if (-10 * log10(vue_physics::get_pl(*__it, t_relay_node_id)) < -10 * log10(current_time.pl)) lost_reason = true;
 			__it++;
 		}
 		s_logger_link << "};";
@@ -219,6 +224,8 @@ void route_udp::log_link(int t_source_node_id, int t_relay_node_id, std::string 
 		s_logger_link << "车辆卷绕，已运动出范围" << endl << endl;
 	}
 	else {
+		if (lost_reason == true) s_logger_link << lost_reason1;
+		else s_logger_link << lost_reason2;
 		s_logger_link << endl;
 	}
 }
