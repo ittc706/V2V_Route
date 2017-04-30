@@ -1,42 +1,31 @@
 #pragma once
-
 #include<vector>
+#include<string>
+#include<stdexcept>
+#include"reflect\object.h"
 #include"enumeration.h"
 
 #define INVALID -1
 
-class config_loader;
-
-class global_control_config {
-	/*------------------友元声明------------------*/
-	/*
-	* 将context设为友元，容器要为其注入依赖项
-	*/
-	friend class context;
-
-	/*--------------------字段--------------------*/
-	/*
-	* 类加载器对象
-	*/
-private:
-	config_loader* m_config_loader;
-	void set_config_loader(config_loader* t_config_loader) {
-		m_config_loader = t_config_loader;
-	}
-public:
-	config_loader* get_config_loader() {
-		return m_config_loader;
-	}
-
+class global_control_config :public object{
+	REGISTE_MEMBER_HEAD(global_control_config)
 	/*
 	* 平台
 	*/
 private:
 	platform m_platform;
-	void set_platform(platform t_platform) {
-		m_platform = t_platform;
-	}
 public:
+	void set_platform(std::string t_platform) {
+		if (t_platform == "Windows") {
+			m_platform = Windows;
+		}
+		else if(t_platform == "Linux") {
+			m_platform = Linux;
+		}
+		else {
+			throw std::logic_error("error");
+		}
+	}
 	platform get_platform() {
 		return m_platform;
 	}
@@ -46,10 +35,10 @@ public:
 	*/
 private:
 	int m_ntti;
-	void set_ntti(int t_ntti) {
-		m_ntti = t_ntti;
-	}
 public:
+	void set_ntti(std::string t_ntti) {
+		m_ntti = stoi(t_ntti);
+	}
 	int get_ntti() {
 		return m_ntti;
 	}
@@ -59,10 +48,18 @@ public:
 	*/
 private:
 	gtt_mode m_gtt_mode;
-	void set_gtt_mode(gtt_mode t_gtt_mode) {
-		m_gtt_mode = t_gtt_mode;
-	}
 public:
+	void set_gtt_mode(std::string t_gtt_mode) {
+		if (t_gtt_mode == "URBAN") {
+			m_gtt_mode = URBAN;
+		}
+		else if (t_gtt_mode == "HIGHSPEED") {
+			m_gtt_mode = HIGHSPEED;
+		}
+		else {
+			throw std::logic_error("error");
+		}
+	}
 	gtt_mode get_gtt_mode() {
 		return m_gtt_mode;
 	}
@@ -72,55 +69,27 @@ public:
 	*/
 private:
 	route_mode m_route_mode;
-	void set_route_mode(route_mode t_route_mode) {
-		m_route_mode = t_route_mode;
-	}
 public:
+	void set_route_mode(std::string t_route_mode) {
+		if (t_route_mode == "TCP") {
+			m_route_mode = TCP;
+		}
+		else if(t_route_mode == "UDP"){
+			m_route_mode = UDP;
+		}
+		else {
+			throw std::logic_error("error");
+		}
+	}
 	route_mode get_route_mode() {
 		return m_route_mode;
 	}
 
-	/*--------------------接口--------------------*/
-public:
-	void load();
 };
 
 
-class gtt_config {
-	/*------------------友元声明------------------*/
-	/*
-	* 将context设为友元，容器要为其注入依赖项
-	*/
-	friend class context;
-
-	/*--------------------字段--------------------*/
-	/*
-	* 根据gtt模式来生成gtt_config配置文件对象
-	*/
-	static gtt_config* gtt_config_bind_by_mode(gtt_mode t_mode);
-
-	/*--------------------字段--------------------*/
-	/*
-	* 类加载器对象
-	*/
-private:
-	config_loader* m_config_loader;
-	void set_config_loader(config_loader* t_config_loader) {
-		m_config_loader = t_config_loader;
-	}
-public:
-	config_loader* get_config_loader() {
-		return m_config_loader;
-	}
-
-	/*--------------------接口--------------------*/
-public:
-	virtual void load() = 0;
-};
-
-
-class gtt_highspeed_config :public gtt_config {
-	/*--------------------字段--------------------*/
+class gtt_highspeed_config :public object {
+	REGISTE_MEMBER_HEAD(gtt_highspeed_config)
 	/*
 	* 道路数量
 	*/
@@ -136,10 +105,10 @@ public:
 	*/
 private:
 	double m_road_length = INVALID;
-	void set_road_length(double t_road_length) {
-		m_road_length = t_road_length;
-	}
 public:
+	void set_road_length(std::string t_road_length) {
+		m_road_length = stod(t_road_length);
+	}
 	double get_road_length() {
 		return m_road_length;
 	}
@@ -149,10 +118,10 @@ public:
 	*/
 private:
 	double m_road_width = INVALID;
-	void set_road_width(double t_road_width) {
-		m_road_width = t_road_width;
-	}
 public:
+	void set_road_width(std::string t_road_width) {
+		m_road_width = stod(t_road_width);
+	}
 	double get_road_width() {
 		return m_road_width;
 	}
@@ -162,10 +131,10 @@ public:
 	*/
 private:
 	double m_speed = INVALID;
-	void set_speed(double t_speed) {
-		m_speed = t_speed;
-	}
 public:
+	void set_speed(std::string t_speed) {
+		m_speed = stod(t_speed);
+	}
 	double get_speed() {
 		return m_speed;
 	}
@@ -192,25 +161,19 @@ public:
 	*/
 private:
 	int m_freshtime = INVALID;
-	void set_freshtime(int t_freshtime) {
-		m_freshtime = t_freshtime;
-	}
 public:
+	void set_freshtime(std::string t_freshtime) {
+		m_freshtime = stoi(t_freshtime);
+	}
 	int get_freshtime() {
 		return m_freshtime;
 	}
-
-	/*--------------------接口--------------------*/
-public:
-	void load() override;
-
 };
 
 
-class gtt_urban_config :public gtt_config {
-	/*--------------------接口--------------------*/
-public:
-	void load() override;
+class gtt_urban_config :public object {
+	REGISTE_MEMBER_HEAD(gtt_urban_config)
+
 	/*
 	* 街区数量
 	*/
@@ -227,13 +190,13 @@ public:
 private:
 	double m_road_length_ew = INVALID;
 	double m_road_length_sn = INVALID;
-	void set_road_length_ew(double t_road_length_ew) {
-		m_road_length_ew = t_road_length_ew;
-	}
-	void set_road_length_sn(double t_road_length_sn) {
-		m_road_length_sn = t_road_length_sn;
-	}
 public:
+	void set_road_length_ew(std::string t_road_length_ew) {
+		m_road_length_ew = stod(t_road_length_ew);
+	}
+	void set_road_length_sn(std::string t_road_length_sn) {
+		m_road_length_sn = stod(t_road_length_sn);
+	}
 	double get_road_length_ew() {
 		return m_road_length_ew;
 	}
@@ -246,10 +209,10 @@ public:
 	*/
 private:
 	double m_road_width = INVALID;
-	void set_road_width(double t_road_width) {
-		m_road_width = t_road_width;
-	}
 public:
+	void set_road_width(std::string t_road_width) {
+		m_road_width = stod(t_road_width);
+	}
 	double get_road_width() {
 		return m_road_width;
 	}
@@ -259,10 +222,10 @@ public:
 	*/
 private:
 	double m_speed = INVALID;
-	void set_speed(double t_speed) {
-		m_speed = t_speed;
-	}
 public:
+	void set_speed(std::string t_speed) {
+		m_speed = stod(t_speed);
+	}
 	double get_speed() {
 		return m_speed;
 	}
@@ -318,10 +281,10 @@ public:
 	*/
 private:
 	int m_freshtime = INVALID;
-	void set_freshtime(int t_freshtime) {
-		m_freshtime = t_freshtime;
-	}
 public:
+	void set_freshtime(std::string t_freshtime) {
+		m_freshtime = stoi(t_freshtime);
+	}
 	int get_freshtime() {
 		return m_freshtime;
 	}
@@ -329,12 +292,8 @@ public:
 };
 
 
-class rrm_config {
-	/*------------------友元声明------------------*/
-	/*
-	* 将context设为友元，容器要为其注入依赖项
-	*/
-	friend class context;
+class rrm_config :public object {
+	REGISTE_MEMBER_HEAD(rrm_config)
 
 	/*------------------静态成员------------------*/
 public:
@@ -349,28 +308,16 @@ public:
 	static const int s_BIT_NUM_PER_RB = 180;
 
 	/*--------------------字段--------------------*/
-	/*
-	* 类加载器对象
-	*/
-private:
-	config_loader* m_config_loader;
-	void set_config_loader(config_loader* t_config_loader) {
-		m_config_loader = t_config_loader;
-	}
-public:
-	config_loader* get_config_loader() {
-		return m_config_loader;
-	}
 
 	/*
 	* 总带宽
 	*/
 private:
 	int m_total_bandwidth;
-	void set_total_bandwidth(int t_total_bandwidth) {
-		m_total_bandwidth = t_total_bandwidth;
-	}
 public:
+	void set_total_bandwidth(std::string t_total_bandwidth) {
+		m_total_bandwidth = stoi(t_total_bandwidth);
+	}
 	int get_total_bandwidth() {
 		return m_total_bandwidth;
 	}
@@ -380,10 +327,10 @@ public:
 	*/
 private:
 	int m_rb_num_per_pattern;
-	void set_rb_num_per_pattern(int t_rb_num_per_pattern) {
-		m_rb_num_per_pattern = t_rb_num_per_pattern;
-	}
 public:
+	void set_rb_num_per_pattern(std::string t_rb_num_per_pattern) {
+		m_rb_num_per_pattern = stoi(t_rb_num_per_pattern);
+	}
 	int get_rb_num_per_pattern() {
 		return m_rb_num_per_pattern;
 	}
@@ -393,10 +340,11 @@ public:
 	*/
 private:
 	int m_pattern_num;
+public:
+	//todo
 	void set_pattern_num() {
 		m_pattern_num = get_total_bandwidth() / s_BANDWIDTH_OF_RB / get_rb_num_per_pattern();
 	}
-public:
 	int get_pattern_num() {
 		return m_pattern_num;
 	}
@@ -406,10 +354,10 @@ public:
 	*/
 private:
 	double m_drop_sinr_boundary;
-	void set_drop_sinr_boundary(double t_drop_sinr_boundary) {
-		m_drop_sinr_boundary = t_drop_sinr_boundary;
-	}
 public:
+	void set_drop_sinr_boundary(std::string t_drop_sinr_boundary) {
+		m_drop_sinr_boundary = stod(t_drop_sinr_boundary);
+	}
 	double get_drop_sinr_boundary() {
 		return m_drop_sinr_boundary;
 	}
@@ -419,10 +367,10 @@ public:
 	*/
 private:
 	int m_select_altorithm;
-	void set_select_altorithm(int t_select_altorithm) {
-		m_select_altorithm = t_select_altorithm;
-	}
 public:
+	void set_select_altorithm(std::string t_select_altorithm) {
+		m_select_altorithm = stoi(t_select_altorithm);
+	}
 	int get_select_altorithm() {
 		return m_select_altorithm;
 	}
@@ -432,49 +380,28 @@ public:
 	*/
 private:
 	int m_time_division_granularity;
-	void set_time_division_granularity(int t_time_division_granularity) {
-		m_time_division_granularity = t_time_division_granularity;
-	}
 public:
+	void set_time_division_granularity(std::string t_time_division_granularity) {
+		m_time_division_granularity = stoi(t_time_division_granularity);
+	}
 	int get_time_division_granularity() {
 		return m_time_division_granularity;
 	}
-	/*--------------------接口--------------------*/
-public:
-	void load();
 };
 
 
-class tmc_config {
-	/*------------------友元声明------------------*/
-	/*
-	* 将context设为友元，容器要为其注入依赖项
-	*/
-	friend class context;
-
-	/*--------------------字段--------------------*/
-	/*
-	* 类加载器对象
-	*/
-private:
-	config_loader* m_config_loader;
-	void set_config_loader(config_loader* t_config_loader) {
-		m_config_loader = t_config_loader;
-	}
-public:
-	config_loader* get_config_loader() {
-		return m_config_loader;
-	}
+class tmc_config :public object {
+	REGISTE_MEMBER_HEAD(tmc_config)
 
 	/*
 	* 事件包数
 	*/
 private:
 	int m_package_num;
-	void set_package_num(int t_package_num) {
-		m_package_num = t_package_num;
-	}
 public:
+	void set_package_num(std::string t_package_num) {
+		m_package_num = stoi(t_package_num);
+	}
 	int get_package_num() {
 		return m_package_num;
 	}
@@ -484,10 +411,10 @@ public:
 	*/
 private:
 	int m_hello_tti;
-	void set_hello_tti(int t_m_hello_tti) {
-		m_hello_tti = t_m_hello_tti;
-	}
 public:
+	void set_hello_tti(std::string t_m_hello_tti) {
+		m_hello_tti = stoi(t_m_hello_tti);
+	}
 	int get_hello_tti() {
 		return m_hello_tti;
 	}
@@ -497,55 +424,29 @@ public:
 	*/
 private:
 	double m_trigger_rate;
-	void set_trigger_rate(double t_trigger_rate) {
-		m_trigger_rate = t_trigger_rate;
-	}
 public:
+	void set_trigger_rate(std::string t_trigger_rate) {
+		m_trigger_rate = stod(t_trigger_rate);
+	}
 	double get_trigger_rate() {
 		return m_trigger_rate;
 	}
-
-	/*--------------------接口--------------------*/
-public:
-	void load();
 };
 
 
-class route_config {
-	/*------------------友元声明------------------*/
-	/*
-	* 将context设为友元，容器要为其注入依赖项
-	*/
-	friend class context;
+class route_config :public object {
+	REGISTE_MEMBER_HEAD(route_config)
 
-	/*--------------------字段--------------------*/
-	/*
-	* 类加载器对象
-	*/
-private:
-	config_loader* m_config_loader;
-	void set_config_loader(config_loader* t_config_loader) {
-		m_config_loader = t_config_loader;
-	}
-public:
-	config_loader* get_config_loader() {
-		return m_config_loader;
-	}
-private:
 	/*
 	* Hello包发送平均周期
 	*/
-
+private:
 	int m_interval;
-	void set_interval(int t_interval) {
-		m_interval = t_interval;
-	}
 public:
+	void set_interval(std::string t_interval) {
+		m_interval = stoi(t_interval);
+	}
 	int get_t_interval() {
 		return m_interval;
 	}
-
-	/*--------------------接口--------------------*/
-public:
-	void load();
 };

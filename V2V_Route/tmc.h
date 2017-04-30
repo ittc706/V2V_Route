@@ -1,7 +1,8 @@
 #pragma once
+#include"reflect\object.h"
 
 
-class tmc {
+class tmc :public object{
 public:
 	/*
 	* 统计仿真各项信息

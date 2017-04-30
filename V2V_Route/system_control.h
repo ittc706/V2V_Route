@@ -1,8 +1,10 @@
 #pragma once
+#include"reflect\object.h"
 
 class context;
 
-class system_control {
+class system_control:public object {
+	REGISTE_MEMBER_HEAD(system_control)
 	/*------------------友元声明------------------*/
 	/*
 	* 将容器类作为友元，以提供依赖注入的权限

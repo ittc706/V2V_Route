@@ -18,12 +18,6 @@
     <ClInclude Include="config.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="config_loader.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="context.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="enumeration.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -69,15 +63,30 @@
     <ClInclude Include="route_udp.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="reflect\bean_definition.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="reflect\micro.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="reflect\object.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="reflect\context.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="reflect\bean_loader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="non_bean_id.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="reflect\invoke.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="config.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="config_loader.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="context.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="gtt.cpp">
@@ -117,6 +126,21 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="route_udp.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="reflect\bean_definition.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="reflect\bean_loader.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="reflect\object.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="reflect\context.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="reflect\invoke.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

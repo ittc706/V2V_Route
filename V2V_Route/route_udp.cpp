@@ -3,14 +3,19 @@
 #include<fstream>
 #include<sstream>
 #include"route_udp.h"
-#include"context.h"
 #include"config.h"
 #include"gtt.h"
 #include"wt.h"
 #include"vue.h"
 #include"vue_physics.h"
 #include"function.h"
+#include"reflect\context.h"
+#include"non_bean_id.h"
+
 using namespace std;
+
+REGISTE_MEMBER_RESOURCE(route_udp)
+
 
 int route_udp_route_event::s_event_count = 0;
 
@@ -34,14 +39,14 @@ void route_udp_link_event::transimit() {
 	}
 
 	if (get_pattern_idx() < 0 || get_pattern_idx() > 4) throw logic_error("error");
-	double sinr = context::get_context()->get_wt()->calculate_sinr(
+	double sinr = ((wt*)context::get_context()->get_bean("wt"))->calculate_sinr(
 		get_source_node_id(),
 		get_destination_node_id(),
 		get_pattern_idx(),
 		route_udp_node::get_node_id_set(get_pattern_idx()));
 	sinr_per_tti.push_back(sinr);
 
-	if (sinr < context::get_context()->get_rrm_config()->get_drop_sinr_boundary()){
+	if (sinr < ((rrm_config*)context::get_context()->get_bean("rrm_config"))->get_drop_sinr_boundary()){
 		m_is_loss = true;
 		m_loss_reason = LOW_SINR;
 	}
@@ -59,14 +64,14 @@ const std::set<int>& route_udp_node::get_node_id_set(int t_pattern_idx) {
 
 route_udp_node::route_udp_node() {
 	m_pattern_state = vector<pair<route_udp_pattern_state,int>>(
-		context::get_context()->get_rrm_config()->get_pattern_num(),
+		((rrm_config*)context::get_context()->get_bean("rrm_config"))->get_pattern_num(),
 		pair<route_udp_pattern_state,int>(IDLE_UDP,0)
 		);
 
 	context* __context = context::get_context();
 
 	//初始化初次发送hello包的时间，目的为了在规定的TTI内完成程序的启动，保证每辆车都建立了自己的邻接表
-	int interval = __context->get_route_config()->get_t_interval();
+	int interval = ((route_config*)__context->get_bean("route_config"))->get_t_interval();
 	uniform_int_distribution<int> u_tti_hello_start(0, interval);
 	m_tti_next_hello = u_tti_hello_start(s_engine);
 }
@@ -137,7 +142,7 @@ void route_udp::log_node_pattern(int t_source_node_id,
 	route_udp_pattern_state t_from_pattern_state,
 	route_udp_pattern_state t_to_pattern_state,
 	string t_description) {
-	s_logger_pattern << "TTI[" << left << setw(3) << context::get_context()->get_tti() << "] - ";
+	s_logger_pattern << "TTI[" << left << setw(3) << (*(int*)context::get_context()->get_non_bean(TTI)) << "] - ";
 	s_logger_pattern << "link[" << left << setw(3) << t_source_node_id << ", ";
 	s_logger_pattern << left << setw(3) << t_relay_node_id << "] - ";
 	s_logger_pattern << "node[" << left << setw(3) << t_cur_node_id << "] - ";
@@ -158,7 +163,7 @@ string route_udp::pattern_state_to_string(route_udp_pattern_state t_pattern_stat
 }
 
 void route_udp::log_event(int t_origin_node_id, int t_fianl_destination_node_id) {
-	s_logger_event << "TTI[" << left << setw(3) << context::get_context()->get_tti() << "] - ";
+	s_logger_event << "TTI[" << left << setw(3) << (*(int*)context::get_context()->get_non_bean(TTI)) << "] - ";
 	s_logger_event << "trigger[" << left << setw(3) << t_origin_node_id << ", ";
 	s_logger_event << left << setw(3) << t_fianl_destination_node_id << "]" << endl;
 
@@ -169,7 +174,9 @@ void route_udp::log_link(int t_source_node_id, int t_relay_node_id, std::string 
 	string lost_reason2 = "连接性不好";
 	bool lost_reason = false;
 	
-	s_logger_link << "TTI[" << left << setw(3) << context::get_context()->get_tti() << "] - ";
+	vue* vue_array = (vue*)context::get_context()->get_non_bean(VUE_ARRAY);
+
+	s_logger_link << "TTI[" << left << setw(3) << (*(int*)context::get_context()->get_non_bean(TTI)) << "] - ";
 	s_logger_link << "link[" << left << setw(3) << t_source_node_id << ", ";
 	s_logger_link << left << setw(3) << t_relay_node_id << "] - ";
 	s_logger_link << "{" << t_description << "}";
@@ -180,7 +187,7 @@ void route_udp::log_link(int t_source_node_id, int t_relay_node_id, std::string 
 		set<int>::iterator it = last_time.infer_node_id.begin();
 		while (it != last_time.infer_node_id.end())
 		{
-			s_logger_link << *it << "(" << __context->get_vue_array()[*it].get_physics_level()->m_absx << "," << __context->get_vue_array()[*it].get_physics_level()->m_absy << "),";
+			s_logger_link << *it << "(" << vue_array[*it].get_physics_level()->m_absx << "," << vue_array[*it].get_physics_level()->m_absy << "),";
 			it++;
 		}
 		s_logger_link << "};";
@@ -201,7 +208,7 @@ void route_udp::log_link(int t_source_node_id, int t_relay_node_id, std::string 
 		set<int>::iterator __it = current_time.infer_node_id.begin();
 		while (__it != current_time.infer_node_id.end())
 		{
-			s_logger_link << *__it << "(" << __context->get_vue_array()[*__it].get_physics_level()->m_absx << "," << __context->get_vue_array()[*__it].get_physics_level()->m_absy << "),";
+			s_logger_link << *__it << "(" << vue_array[*__it].get_physics_level()->m_absx << "," << vue_array[*__it].get_physics_level()->m_absy << "),";
 			s_logger_link << "PL:" << -10*log10(vue_physics::get_pl(*__it, t_relay_node_id)) << ",";
 			if (-10 * log10(vue_physics::get_pl(*__it, t_relay_node_id)) < -10 * log10(current_time.pl)) lost_reason = true;
 			__it++;
@@ -237,10 +244,10 @@ route_udp::route_udp() {
 
 void route_udp::initialize() {
 	context* __context = context::get_context();
-	int vue_num = __context->get_gtt()->get_vue_num();
+	int vue_num = ((gtt*)__context->get_bean("gtt"))->get_vue_num();
 	m_node_array = new route_udp_node[vue_num];
 
-	if (__context->get_global_control_config()->get_platform() == Windows) {
+	if (((global_control_config*)__context->get_bean("global_control_config"))->get_platform() == Windows) {
 		s_logger_pattern.open("log\\route_udp_pattern_log.txt");
 		s_logger_link.open("log\\route_udp_link_log.txt");
 		s_logger_event.open("log\\route_udp_event_log.txt");
@@ -251,7 +258,7 @@ void route_udp::initialize() {
 		s_logger_event.open("log/route_udp_event_log.txt");
 	}
 
-	route_udp_node::s_node_id_per_pattern = vector<set<int>>(context::get_context()->get_rrm_config()->get_pattern_num());
+	route_udp_node::s_node_id_per_pattern = vector<set<int>>(((rrm_config*)context::get_context()->get_bean("rrm_config"))->get_pattern_num());
 }
 
 void route_udp::process_per_tti() {
@@ -277,8 +284,7 @@ void route_udp::update_route_table_from_physics_level() {
 
 	//<Warn>:暂时改为根据距离确定邻接表
 	context* __context = context::get_context();
-	vue* vue_ary = __context->get_vue_array();
-	int vue_num = __context->get_gtt()->get_vue_num();
+	int vue_num = ((gtt*)__context->get_bean("gtt"))->get_vue_num();
 	for (int vue_id_i = 0; vue_id_i < vue_num; vue_id_i++) {
 		for (int vue_id_j = 0; vue_id_j < vue_num; vue_id_j++) {
 			if (vue_id_i == vue_id_j)continue;
@@ -296,8 +302,8 @@ void route_udp::update_adjacent_list() {
 		route_udp_node& source_node = get_node_array()[source_node_id];
 
 		context* __context = context::get_context();
-		int current_tti = __context->get_tti();
-		int interval = 1.5*__context->get_route_config()->get_t_interval();
+		int current_tti = (*(int*)context::get_context()->get_non_bean(TTI));
+		int interval = 1.5*((route_config*)__context->get_bean("route_config"))->get_t_interval();
 		vector<pair<int, adjacent_message>>::iterator it= source_node.m_adjacent_list.begin();
 		while (it != source_node.m_adjacent_list.end()) {
 			if ((current_tti - it->second.life_time) > interval) {
@@ -312,13 +318,13 @@ void route_udp::update_adjacent_list() {
 
 void route_udp::event_trigger() {
 	context* __context = context::get_context();
-	double trigger_rate = __context->get_tmc_config()->get_trigger_rate();
+	double trigger_rate = ((tmc_config*)__context->get_bean("tmc_config"))->get_trigger_rate();
 
 	uniform_real_distribution<double> u_rate(0, 1);
 	uniform_int_distribution<int> u_node_id(0, route_udp_node::s_node_count - 1);
 
 	//通过配置文件来控制hello包的传输平均间隔
-	int interval = __context->get_route_config()->get_t_interval();
+	int interval = ((route_config*)__context->get_bean("route_config"))->get_t_interval();
 	uniform_int_distribution<int> u_tti_hello_between(0.5*interval, 1.5*interval);
 
 	//触发Hello包
@@ -326,7 +332,7 @@ void route_udp::event_trigger() {
 		route_udp_node& source_node = get_node_array()[origin_source_node_id];
 
 		//判断是否到该发送hello包的时间
-		if (source_node.m_tti_next_hello == __context->get_tti()) {
+		if (source_node.m_tti_next_hello == (*(int*)context::get_context()->get_non_bean(TTI))) {
 			get_node_array()[origin_source_node_id].offer_send_event_queue(
 				new route_udp_route_event(origin_source_node_id, -1, HEllO)
 			);
@@ -337,7 +343,7 @@ void route_udp::event_trigger() {
 	}
 
 	//在初始化时间过后，触发数据传输事件
-	if(__context->get_tti()>interval){
+	if((*(int*)context::get_context()->get_non_bean(TTI))>interval){
 		for (int origin_source_node_id = 0; origin_source_node_id < route_udp_node::s_node_count; origin_source_node_id++) {
 			if (u_rate(s_engine) < trigger_rate) {
 
@@ -530,6 +536,7 @@ void route_udp::transmit_data() {
 					route_udp_node::s_node_id_per_pattern[pattern_idx].erase(source_node_id);
 				}
 
+				vue* vue_array = (vue*)context::get_context()->get_non_bean(VUE_ARRAY);
 
 				//判断是否丢包
 				if ((*it)->get_is_loss()) {
@@ -549,10 +556,10 @@ void route_udp::transmit_data() {
 							temp.pattern_id = pattern_idx;
 							temp.sinr = (*it)->sinr_per_tti;
 							temp.infer_node_id = route_udp_node::s_node_id_per_pattern[pattern_idx];
-							temp.send_node_x = __context->get_vue_array()[destination_node.get_id()].get_physics_level()->m_absx;
-							temp.send_node_y = __context->get_vue_array()[destination_node.get_id()].get_physics_level()->m_absy;
-							temp.receive_node_x = __context->get_vue_array()[source_node_id].get_physics_level()->m_absx;
-							temp.receive_node_y = __context->get_vue_array()[source_node_id].get_physics_level()->m_absy;
+							temp.send_node_x = vue_array[destination_node.get_id()].get_physics_level()->m_absx;
+							temp.send_node_y = vue_array[destination_node.get_id()].get_physics_level()->m_absy;
+							temp.receive_node_x = vue_array[source_node_id].get_physics_level()->m_absx;
+							temp.receive_node_y = vue_array[source_node_id].get_physics_level()->m_absy;
 							temp.pl = vue_physics::get_pl(source_node_id, destination_node.get_id());
 
 							log_link(source_node_id, (*it)->get_destination_node_id(), "FAILED", loss_reason, source_node.m_adjacent_list[count].second, temp);
@@ -619,13 +626,13 @@ void route_udp::transmit_data() {
 						context* __context = context::get_context();
 						adjacent_message temp;
 						temp.pattern_id = pattern_idx;
-						temp.life_time = __context->get_tti();
+						temp.life_time = (*(int*)context::get_context()->get_non_bean(TTI));
 						temp.infer_node_id = route_udp_node::s_node_id_per_pattern[pattern_idx];
 						temp.sinr = (*it)->sinr_per_tti;
-						temp.receive_node_x = __context->get_vue_array()[destination_node.get_id()].get_physics_level()->m_absx;
-						temp.receive_node_y = __context->get_vue_array()[destination_node.get_id()].get_physics_level()->m_absy;
-						temp.send_node_x = __context->get_vue_array()[source_node_id].get_physics_level()->m_absx;
-						temp.send_node_y = __context->get_vue_array()[source_node_id].get_physics_level()->m_absy;
+						temp.receive_node_x = vue_array[destination_node.get_id()].get_physics_level()->m_absx;
+						temp.receive_node_y = vue_array[destination_node.get_id()].get_physics_level()->m_absy;
+						temp.send_node_x = vue_array[source_node_id].get_physics_level()->m_absx;
+						temp.send_node_y = vue_array[source_node_id].get_physics_level()->m_absy;
 						temp.pl = vue_physics::get_pl(destination_node.get_id(), source_node_id);
 
 						destination_node.add_to_adjacent_list(source_node.get_id(),temp);

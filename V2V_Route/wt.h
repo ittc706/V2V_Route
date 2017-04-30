@@ -4,10 +4,11 @@
 #include<random>
 #include<utility>
 #include<memory>
+#include"reflect\object.h"
 
 class sender_event;
 
-class wt {
+class wt :public object{
 	/*------------------友元声明------------------*/
 	/*
 	* 将context设为友元，容器要为其注入依赖项

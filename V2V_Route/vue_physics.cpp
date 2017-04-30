@@ -18,13 +18,14 @@
 
 #include"vue.h"
 #include"vue_physics.h"
-#include"context.h"
 #include"gtt.h"
 #include"gtt_urban.h"
 #include"gtt_highspeed.h"
 #include"config.h"
 #include"imta.h"
 #include"function.h"
+#include"reflect\context.h"
+#include"non_bean_id.h"
 
 using namespace std;
 
@@ -95,7 +96,7 @@ int vue_physics::get_slot_time_idx() {
 }
 
 void vue_physics::update_location_highspeed() {
-	auto p = (gtt_highspeed*)context::get_context()->get_gtt();
+	auto p = (gtt_highspeed*)((gtt*)context::get_context()->get_bean("gtt"));
 	//get_freshtime()的单位是TTI，这里转换成s
 	double freshtime_second = static_cast<double>(p->get_precise_config()->get_freshtime()) / 1000.0;
 	if (m_vangle == 0)
@@ -127,7 +128,7 @@ void vue_physics::update_location_highspeed() {
 }
 
 void vue_physics::update_location_urban() {
-	auto p = (gtt_urban*)context::get_context()->get_gtt();
+	auto p = (gtt_urban*)((gtt*)context::get_context()->get_bean("gtt"));
 	//get_freshtime()的单位是TTI，这里转换成s
 	double freshtime_second = static_cast<double>(p->get_precise_config()->get_freshtime()) / 1000.0;
 	bool RoadChangeFlag = false;

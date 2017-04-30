@@ -1,0 +1,79 @@
+#pragma once
+#include<unordered_map>
+#include<string>
+#include<assert.h>
+#include"object.h"
+#include"bean_loader.h"
+#include"bean_definition.h"
+
+
+/*
+* 容器类
+*/
+class context {
+private:
+	/*
+	* 配置文件路径
+	*/
+	const std::string configuration_path;
+
+	/*
+	* bean映射字典
+	*/
+	std::unordered_map<std::string, object*> bean_map;
+
+	/*
+	* 不是通过配置文件配置的对象
+	*/
+	std::unordered_map<std::string, void*> non_bean_map;
+
+	/*
+	* 配置文件加载器
+	*/
+	bean_loader* loader = nullptr;
+
+	std::vector<bean_definition*> bean_definitions;
+
+	/*
+	* 单例模式,私有化构造函数
+	*/
+private:
+	static context* __context;
+private:
+	context(const std::string& path);
+public:
+	~context();
+	static void create_context(const std::string& path);
+	static context* get_context();
+
+private:
+	/*
+	* 容器初始化
+	*/
+	void init();
+
+	/*
+	* 解析配置文件
+	*/
+	void parseConfiguration();
+
+	/*
+	* 按照指定顺序初始化所有bean
+	*/
+	void create_and_init_bean();
+
+	/*
+	* 预处理器
+	*/
+	void pre_process();
+
+	/*
+	* 后处理器
+	*/
+	void post_process();
+public:
+	object* get_bean(std::string bean_id);
+
+	void add_non_bean(std::string bean_id, void* non_bean);
+	void* get_non_bean(std::string bean_id);
+};

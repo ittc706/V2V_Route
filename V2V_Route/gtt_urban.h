@@ -1,10 +1,11 @@
 #pragma once
-
+#include"reflect\object.h"
 #include"gtt.h"
 
 class gtt_urban_config;
 
-class gtt_urban :public gtt {
+class gtt_urban :public object, public gtt {
+	REGISTE_MEMBER_HEAD(gtt_urban)
 	/*--------------------½Ó¿Ú--------------------*/
 public:
 	void initialize() override;

@@ -18,7 +18,6 @@
 
 #include<random>
 #include<fstream>
-#include"context.h"
 #include"gtt.h"
 #include"tmc.h"
 #include"vue.h"
@@ -26,6 +25,8 @@
 #include"config.h"
 #include"route_tcp.h"
 #include"route_udp.h"
+#include"reflect\context.h"
+#include"non_bean_id.h"
 
 using namespace std;
 
@@ -33,7 +34,7 @@ void tmc::statistic() {
 	context* __context = context::get_context();
 	ofstream success_route_event;
 	ofstream failed_route_event;
-	if (context::get_context()->get_global_control_config()->get_platform() == Windows) {
+	if (((global_control_config*)context::get_context()->get_bean("global_control_config"))->get_platform() == Windows) {
 		success_route_event.open("log\\success_event.txt");
 		failed_route_event.open("log\\failed_event.txt");
 	}
@@ -42,8 +43,8 @@ void tmc::statistic() {
 		failed_route_event.open("log/failed_event.txt");
 	}
 
-	if (context::get_context()->get_global_control_config()->get_route_mode() == TCP) {
-		route_tcp* __route = (route_tcp*)(__context->get_route());
+	if (((global_control_config*)context::get_context()->get_bean("global_control_config"))->get_route_mode() == TCP) {
+		route_tcp* __route = (route_tcp*)(((route*)context::get_context()->get_bean("route")));
 		success_route_event << "total success event: " << __route->get_successful_event_vec().size() << endl;
 		failed_route_event << "total failed event: " << __route->get_failed_event_vec().size() << endl;
 
@@ -52,7 +53,7 @@ void tmc::statistic() {
 		}
 	}
 	else {
-		route_udp* __route = (route_udp*)(__context->get_route());
+		route_udp* __route = (route_udp*)(((route*)context::get_context()->get_bean("route")));
 		success_route_event << "total success event: " << __route->get_success_route_event_num() << endl;
 		failed_route_event << "total failed event: " << __route->get_failed_route_event_num() << endl;
 		/*for (route_udp_route_event* udp_event : __route->get_successful_route_event_vec()) {

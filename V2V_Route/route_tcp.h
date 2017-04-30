@@ -8,8 +8,10 @@
 #include<random>
 #include<string>
 #include"route.h"
-#include"context.h"
 #include"config.h"
+#include"reflect\object.h"
+#include"reflect\context.h"
+
 
 enum route_response_state{
 	ACCEPT,
@@ -118,7 +120,7 @@ public:
 		m_event_id(s_event_count++), 
 		m_origin_source_node_id(t_source_node),
 		m_final_destination_node_id(t_destination_node),
-		m_package_num(context::get_context()->get_tmc_config()->get_package_num()){
+		m_package_num(((tmc_config*)context::get_context()->get_bean("tmc_config"))->get_package_num()){
 		set_current_node_id(t_source_node);
 	}
 
@@ -346,7 +348,8 @@ public:
 	std::pair<int,int> select_relay_information();
 };
 
-class route_tcp :public route {
+class route_tcp :public object,public route {
+	REGISTE_MEMBER_HEAD(route_tcp)
 	/*
 	* »√context»›∆˜Ã·π©“¿¿µ◊¢»Î
 	*/

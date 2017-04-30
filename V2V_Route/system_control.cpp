@@ -18,15 +18,18 @@
 
 #include"system_control.h"
 #include"function.h"
-#include"context.h"
 #include"config.h"
 #include"gtt.h"
 #include"gtt_highspeed.h"
 #include"tmc.h"
 #include"vue.h"
 #include"route.h"
+#include"reflect\context.h"
+#include"non_bean_id.h"
 
 using namespace std;
+
+REGISTE_MEMBER_RESOURCE(system_control)
 
 void system_control::set_context(context* t_context) {
 	m_context = t_context;
@@ -45,18 +48,18 @@ system_control::~system_control() {
 }
 
 void system_control::process() {
-	while (m_context->get_tti() < m_context->get_global_control_config()->get_ntti()) {
-		cout << "TTI: " << m_context->get_tti() << endl;
+	while ((*(int*)context::get_context()->get_non_bean(TTI)) < ((global_control_config*)context::get_context()->get_bean("global_control_config"))->get_ntti()) {
+		cout << "TTI: " << (*(int*)context::get_context()->get_non_bean(TTI)) << endl;
 
 		//车辆运动
-		m_context->get_gtt()->fresh_location();
+		((gtt*)context::get_context()->get_bean("gtt"))->fresh_location();
 
 		//路由层更新
-		m_context->get_route()->process_per_tti();
+		((route*)context::get_context()->get_bean("route"))->process_per_tti();
 
-		m_context->increase_tti();
+		++(*(int*)context::get_context()->get_non_bean(TTI));
 	}
 
-	m_context->get_tmc()->statistic();
+	((tmc*)context::get_context()->get_bean("tmc"))->statistic();
 }
 

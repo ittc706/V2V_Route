@@ -114,8 +114,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="config.h" />
-    <ClInclude Include="config_loader.h" />
-    <ClInclude Include="context.h" />
     <ClInclude Include="enumeration.h" />
     <ClInclude Include="fftw3.h" />
     <ClInclude Include="function.h" />
@@ -123,6 +121,13 @@
     <ClInclude Include="gtt_highspeed.h" />
     <ClInclude Include="gtt_urban.h" />
     <ClInclude Include="imta.h" />
+    <ClInclude Include="non_bean_id.h" />
+    <ClInclude Include="reflect\bean_definition.h" />
+    <ClInclude Include="reflect\bean_loader.h" />
+    <ClInclude Include="reflect\context.h" />
+    <ClInclude Include="reflect\invoke.h" />
+    <ClInclude Include="reflect\micro.h" />
+    <ClInclude Include="reflect\object.h" />
     <ClInclude Include="route.h" />
     <ClInclude Include="route_tcp.h" />
     <ClInclude Include="route_udp.h" />
@@ -134,13 +139,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="config.cpp" />
-    <ClCompile Include="config_loader.cpp" />
-    <ClCompile Include="context.cpp" />
     <ClCompile Include="gtt.cpp" />
     <ClCompile Include="gtt_highspeed.cpp" />
     <ClCompile Include="gtt_urban.cpp" />
     <ClCompile Include="imta.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="reflect\bean_definition.cpp" />
+    <ClCompile Include="reflect\bean_loader.cpp" />
+    <ClCompile Include="reflect\context.cpp" />
+    <ClCompile Include="reflect\invoke.cpp" />
+    <ClCompile Include="reflect\object.cpp" />
     <ClCompile Include="route.cpp" />
     <ClCompile Include="route_tcp.cpp" />
     <ClCompile Include="route_udp.cpp" />

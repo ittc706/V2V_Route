@@ -3,14 +3,17 @@
 #include<fstream>
 #include<sstream>
 #include"route_tcp.h"
-#include"context.h"
 #include"config.h"
 #include"gtt.h"
 #include"wt.h"
 #include"vue.h"
 #include"vue_physics.h"
 #include"function.h"
+#include"reflect\context.h"
+#include"non_bean_id.h"
+
 using namespace std;
+REGISTE_MEMBER_RESOURCE(route_tcp)
 
 int route_tcp_route_event::s_event_count = 0;
 
@@ -31,13 +34,13 @@ void route_tcp_link_event::transimit() {
 		m_is_finished = true;
 	}
 
-	double sinr = context::get_context()->get_wt()->calculate_sinr(
+	double sinr = ((wt*)context::get_context()->get_bean("wt"))->calculate_sinr(
 		get_source_node_id(),
 		get_destination_node_id(),
 		get_pattern_idx(),
 		route_tcp_node::get_node_id_set(get_pattern_idx()));
 
-	if (sinr < context::get_context()->get_rrm_config()->get_drop_sinr_boundary()-100) {
+	if (sinr < ((rrm_config*)context::get_context()->get_bean("rrm_config"))->get_drop_sinr_boundary() - 100) {
 		m_is_loss = true;
 	}
 }
@@ -54,20 +57,20 @@ const std::set<int>& route_tcp_node::get_node_id_set(int t_pattern_idx) {
 
 route_tcp_node::route_tcp_node() {
 	m_pattern_state = vector<pair<route_tcp_pattern_state, route_tcp_link_event*>>(
-		context::get_context()->get_rrm_config()->get_pattern_num(),
+		((rrm_config*)context::get_context()->get_bean("rrm_config"))->get_pattern_num(),
 		pair<route_tcp_pattern_state, route_tcp_link_event*>(IDLE, nullptr)
 		);
 
 	m_select_cache = pair<int, int>(-1, -1);
 	m_last_round_request_per_pattern = vector<vector<int>>(
-		context::get_context()->get_rrm_config()->get_pattern_num()
+		((rrm_config*)context::get_context()->get_bean("rrm_config"))->get_pattern_num()
 		);
 	m_syn_request_per_pattern = vector<vector<int>>(
-		context::get_context()->get_rrm_config()->get_pattern_num()
+		((rrm_config*)context::get_context()->get_bean("rrm_config"))->get_pattern_num()
 		);
 
 	m_next_round_link_event = vector<route_tcp_link_event*>(
-		context::get_context()->get_rrm_config()->get_pattern_num(),
+		((rrm_config*)context::get_context()->get_bean("rrm_config"))->get_pattern_num(),
 		nullptr
 		);
 }
@@ -120,7 +123,7 @@ void route_tcp::log_node_pattern(int t_source_node_id,
 	route_tcp_pattern_state t_from_pattern_state,
 	route_tcp_pattern_state t_to_pattern_state,
 	string t_description) {
-	s_logger_pattern << "TTI[" << left << setw(3) << context::get_context()->get_tti() << "] - ";
+	s_logger_pattern << "TTI[" << left << setw(3) << (*(int*)context::get_context()->get_non_bean(TTI)) << "] - ";
 	s_logger_pattern << "link[" << left << setw(3) << t_source_node_id << ", ";
 	s_logger_pattern << left << setw(3) << t_relay_node_id << "] - ";
 	s_logger_pattern << "node[" << left << setw(3) << t_cur_node_id << "] - ";
@@ -145,14 +148,14 @@ string route_tcp::pattern_state_to_string(route_tcp_pattern_state t_pattern_stat
 }
 
 void route_tcp::log_event(int t_origin_node_id, int t_fianl_destination_node_id) {
-	s_logger_event << "TTI[" << left << setw(3) << context::get_context()->get_tti() << "] - ";
+	s_logger_event << "TTI[" << left << setw(3) << (*(int*)context::get_context()->get_non_bean(TTI)) << "] - ";
 	s_logger_event << "trigger[" << left << setw(3) << t_origin_node_id << ", ";
 	s_logger_event << left << setw(3) << t_fianl_destination_node_id << "]" << endl;
 
 }
 
 void route_tcp::log_link(int t_source_node_id, int t_relay_node_id, std::string t_description) {
-	s_logger_link << "TTI[" << left << setw(3) << context::get_context()->get_tti() << "] - ";
+	s_logger_link << "TTI[" << left << setw(3) << (*(int*)context::get_context()->get_non_bean(TTI)) << "] - ";
 	s_logger_link << "link[" << left << setw(3) << t_source_node_id << ", ";
 	s_logger_link << left << setw(3) << t_relay_node_id << "] - ";
 	s_logger_link << "{" << t_description << "}" << endl;
@@ -165,10 +168,10 @@ route_tcp::route_tcp() {
 
 void route_tcp::initialize() {
 	context* __context = context::get_context();
-	int vue_num = __context->get_gtt()->get_vue_num();
+	int vue_num = ((gtt*)__context->get_bean("gtt"))->get_vue_num();
 	m_node_array = new route_tcp_node[vue_num];
 
-	if (__context->get_global_control_config()->get_platform() == Windows) {
+	if (((global_control_config*)__context->get_bean("global_control_config"))->get_platform() == Windows) {
 		s_logger_pattern.open("log\\route_tcp_pattern_log.txt");
 		s_logger_link.open("log\\route_tcp_link_log.txt");
 		s_logger_event.open("log\\route_tcp_event_log.txt");
@@ -179,7 +182,7 @@ void route_tcp::initialize() {
 		s_logger_event.open("log/route_tcp_event_log.txt");
 	}
 
-	route_tcp_node::s_node_id_per_pattern = vector<set<int>>(context::get_context()->get_rrm_config()->get_pattern_num());
+	route_tcp_node::s_node_id_per_pattern = vector<set<int>>(((rrm_config*)context::get_context()->get_bean("rrm_config"))->get_pattern_num());
 }
 
 void route_tcp::process_per_tti() {
@@ -207,8 +210,7 @@ void route_tcp::update_route_table_from_physics_level() {
 
 	//<Warn>:暂时改为根据距离确定邻接表
 	context* __context = context::get_context();
-	vue* vue_ary = __context->get_vue_array();
-	int vue_num = __context->get_gtt()->get_vue_num();
+	int vue_num = ((gtt*)__context->get_bean("gtt"))->get_vue_num();
 	for (int vue_id_i = 0; vue_id_i < vue_num; vue_id_i++) {
 		for (int vue_id_j = 0; vue_id_j < vue_num; vue_id_j++) {
 			if (vue_id_i == vue_id_j)continue;
@@ -222,7 +224,7 @@ void route_tcp::update_route_table_from_physics_level() {
 
 void route_tcp::event_trigger() {
 	context* __context = context::get_context();
-	double trigger_rate = __context->get_tmc_config()->get_trigger_rate();
+	double trigger_rate = ((tmc_config*)__context->get_bean("tmc_config"))->get_trigger_rate();
 
 	uniform_real_distribution<double> u_rate(0, 1);
 	uniform_int_distribution<int> u_node_id(0, route_tcp_node::s_node_count - 1);
@@ -236,7 +238,7 @@ void route_tcp::event_trigger() {
 			}
 			get_node_array()[origin_source_node_id].offer_send_event_queue(
 				new route_tcp_route_event(origin_source_node_id, final_destination_node_id)
-			);
+				);
 			log_event(origin_source_node_id, final_destination_node_id);
 		}
 	}
@@ -248,7 +250,7 @@ void route_tcp::update_tobe() {
 	//将TO_BE_SEND/RECEIVE转换为SENDING/RECEIVING，同时将link_event从m_next_round_link_event转移到m_pattern_state中
 	for (int relay_node_id = 0; relay_node_id < route_tcp_node::s_node_count; relay_node_id++) {
 		route_tcp_node& relay_node = get_node_array()[relay_node_id];
-		for (int pattern_idx = 0; pattern_idx < context::get_context()->get_rrm_config()->get_pattern_num(); pattern_idx++) {
+		for (int pattern_idx = 0; pattern_idx < ((rrm_config*)context::get_context()->get_bean("rrm_config"))->get_pattern_num(); pattern_idx++) {
 			if (relay_node.m_next_round_link_event[pattern_idx] != nullptr) {
 
 				route_tcp_pattern_state temp_relay_state = relay_node.m_pattern_state[pattern_idx].first;
@@ -279,7 +281,7 @@ void route_tcp::update_tobe() {
 					temp_source_state,
 					source_node.m_pattern_state[pattern_idx].first,
 					""
-				);
+					);
 
 				log_node_pattern(
 					source_node_id,
@@ -289,7 +291,7 @@ void route_tcp::update_tobe() {
 					temp_relay_state,
 					relay_node.m_pattern_state[pattern_idx].first,
 					""
-				);
+					);
 			}
 		}
 	}
@@ -339,7 +341,7 @@ void route_tcp::send_syn() {
 			temp_source_state,
 			source_node.m_pattern_state[pattern_idx].first,
 			""
-		);
+			);
 
 		route_tcp_node& relay_node = get_node_array()[relay_node_id];
 		relay_node.add_syn_request(pattern_idx, source_node_id);
@@ -349,7 +351,7 @@ void route_tcp::send_syn() {
 void route_tcp::send_ack() {
 	for (int relay_node_id = 0; relay_node_id < route_tcp_node::s_node_count; relay_node_id++) {
 		route_tcp_node& relay_node = get_node_array()[relay_node_id];
-		for (int pattern_idx = 0; pattern_idx < context::get_context()->get_rrm_config()->get_pattern_num(); pattern_idx++) {
+		for (int pattern_idx = 0; pattern_idx < ((rrm_config*)context::get_context()->get_bean("rrm_config"))->get_pattern_num(); pattern_idx++) {
 			//该pattern下，没有syn请求，跳过即可
 			if (relay_node.m_last_round_request_per_pattern[pattern_idx].size() == 0) continue;
 
@@ -373,7 +375,7 @@ void route_tcp::send_ack() {
 						temp_rejected_source_state,
 						rejected_source_node.m_pattern_state[pattern_idx].first,
 						""
-					);
+						);
 				}
 			}
 			else {
@@ -387,7 +389,7 @@ void route_tcp::send_ack() {
 				//创建链路事件
 				route_tcp_link_event* link_event = new route_tcp_link_event(
 					selected_source_node_id, relay_node_id, pattern_idx, route_event->get_package_num()
-				);
+					);
 				//添加到待发列表中，不直接添加到发送列表是避免当前tti就进行传输
 				if (relay_node.m_next_round_link_event[pattern_idx] != nullptr) throw logic_error("error");
 				relay_node.m_next_round_link_event[pattern_idx] = link_event;
@@ -409,7 +411,7 @@ void route_tcp::send_ack() {
 					temp_relay_state,
 					relay_node.m_pattern_state[pattern_idx].first,
 					""
-				);
+					);
 
 				/*selected_source_node不要清除select_cache，避免在传输过程中，又请求其他车辆发送*/
 
@@ -432,7 +434,7 @@ void route_tcp::send_ack() {
 						temp_rejected_source_state,
 						rejected_source_node.m_pattern_state[pattern_idx].first,
 						""
-					);
+						);
 				}
 			}
 		}
@@ -442,7 +444,7 @@ void route_tcp::send_ack() {
 void route_tcp::receive_data() {
 	for (int relay_node_id = 0; relay_node_id < route_tcp_node::s_node_count; relay_node_id++) {
 		route_tcp_node& relay_node = get_node_array()[relay_node_id];
-		for (int pattern_idx = 0; pattern_idx < context::get_context()->get_rrm_config()->get_pattern_num(); pattern_idx++) {
+		for (int pattern_idx = 0; pattern_idx < ((rrm_config*)context::get_context()->get_bean("rrm_config"))->get_pattern_num(); pattern_idx++) {
 			if (relay_node.m_pattern_state[pattern_idx].first == RECEIVING) {
 				route_tcp_link_event* link_event = relay_node.m_pattern_state[pattern_idx].second;
 
@@ -473,7 +475,7 @@ void route_tcp::receive_data() {
 						temp_source_state,
 						source_node.m_pattern_state[pattern_idx].first,
 						""
-					);
+						);
 
 					log_node_pattern(
 						source_node_id,
@@ -483,7 +485,7 @@ void route_tcp::receive_data() {
 						temp_relay_state,
 						relay_node.m_pattern_state[pattern_idx].first,
 						""
-					);
+						);
 
 					if (link_event->get_is_loss()) {
 						//丢包了

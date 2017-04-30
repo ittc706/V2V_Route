@@ -8,8 +8,10 @@
 #include<random>
 #include<string>
 #include"route.h"
-#include"context.h"
 #include"config.h"
+#include"reflect\object.h"
+#include"reflect\context.h"
+
 using namespace std;
 
 enum route_udp_pattern_state {
@@ -151,8 +153,8 @@ public:
 		m_event_id(s_event_count++),
 		m_origin_source_node_id(t_source_node),
 		m_final_destination_node_id(t_destination_node),
-		m_hello_tti_num(context::get_context()->get_tmc_config()->get_hello_tti()),
-		m_tti_num(context::get_context()->get_tmc_config()->get_package_num()) {
+		m_hello_tti_num(((tmc_config*)context::get_context()->get_bean("tmc_config"))->get_hello_tti()),
+		m_tti_num(((tmc_config*)context::get_context()->get_bean("tmc_config"))->get_package_num()) {
 		set_current_node_id(t_source_node);
 	}
 
@@ -386,7 +388,8 @@ public:
 	std::pair<int, int> select_relay_information();
 };
 
-class route_udp :public route {
+class route_udp :public object, public route {
+	REGISTE_MEMBER_HEAD(route_udp)
 	/*
 	* ÈÃcontextÈİÆ÷Ìá¹©ÒÀÀµ×¢Èë
 	*/

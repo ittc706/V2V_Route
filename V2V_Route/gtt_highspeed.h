@@ -1,10 +1,11 @@
 #pragma once
-
+#include"reflect\object.h"
 #include"gtt.h"
 
 class gtt_highspeed_config;
 
-class gtt_highspeed:public gtt{
+class gtt_highspeed:public object,public gtt{
+	REGISTE_MEMBER_HEAD(gtt_highspeed)
 	/*--------------------½Ó¿Ú--------------------*/
 public:
 	void initialize() override;

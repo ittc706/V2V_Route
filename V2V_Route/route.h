@@ -11,7 +11,7 @@ struct event_trigger_dto {
 	int destination_vue_id;
 };
 
-class route {
+class route{
 	/*------------------友元声明------------------*/
 	/*
 	* 将context设为友元，容器要为其注入依赖项
