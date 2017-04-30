@@ -30,10 +30,13 @@
 
 using namespace std;
 
-REGISTE_MEMBER_RESOURCE(gtt_highspeed)
+
+void gtt_highspeed::set_config(object* t_config) {
+	m_config = (gtt_highspeed_config*)t_config;
+}
 
 void gtt_highspeed::initialize() {
-	gtt_highspeed_config* __config = get_precise_config();
+	gtt_highspeed_config* __config = get_config();
 	int* m_pupr = new int[__config->get_road_num()];//每条路上的车辆数
 	double* TotalTime = new double[__config->get_road_num()];//每条道路初始泊松撒点过程中所有车辆都已撒进区域内所用的总时间
 	std::list<double>* possion = new std::list<double>[__config->get_road_num()];//每条道路初始泊松撒点的车辆到达时间间隔list，单位s
@@ -126,7 +129,7 @@ int gtt_highspeed::get_vue_num() {
 
 void gtt_highspeed::fresh_location() {
 	//<Warn>:将信道刷新时间和位置刷新时间分开
-	if ((*(int*)context::get_context()->get_non_bean(TTI)) % get_precise_config()->get_freshtime() != 0) {
+	if ((*(int*)context::get_context()->get_non_bean(TTI)) % get_config()->get_freshtime() != 0) {
 		return;
 	}
 
@@ -226,6 +229,3 @@ void gtt_highspeed::calculate_pl(int t_vue_id1, int t_vue_id2) {
 	memory_clean::safe_delete(__imta);
 }
 
-gtt_highspeed_config* gtt_highspeed::get_precise_config() {
-	return (gtt_highspeed_config*)get_config();
-}

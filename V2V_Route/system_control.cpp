@@ -29,8 +29,6 @@
 
 using namespace std;
 
-REGISTE_MEMBER_RESOURCE(system_control)
-
 void system_control::set_context(context* t_context) {
 	m_context = t_context;
 }

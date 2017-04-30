@@ -17,13 +17,17 @@ friend void invoke(const object* obj, const std::string& method_name, double par
 friend void invoke(const object* obj, const std::string& method_name, void* param1); \
 \
 friend void invoke(const object* obj, const std::string& method_name, const std::string& param1); \
+\
+friend void invoke(const object* obj, const std::string& method_name, object* param1); \
+
+
 /*--------------------------------------------------------------------------*/
 
 /*
 * ×¢²áÀàÐÍidµÄºê
 */
 #define REGISTE_CLASS_ID(class_type)\
-protected:\
+public:\
 	static const long class_id;\
 
 /*

@@ -43,6 +43,13 @@ void invoke(const object* obj, const std::string& method_name, void* param1);
 
 /*
 * 函数反射注册
-* 参数类型：void*
+* 参数类型：std::string
 */
 void invoke(const object* obj, const std::string& method_name, const std::string& param1);
+
+
+/*
+* 函数反射注册
+* 参数类型：object*
+*/
+void invoke(const object* obj, const std::string& method_name, object* param1);

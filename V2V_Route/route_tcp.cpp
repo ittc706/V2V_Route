@@ -13,7 +13,6 @@
 #include"non_bean_id.h"
 
 using namespace std;
-REGISTE_MEMBER_RESOURCE(route_tcp)
 
 int route_tcp_route_event::s_event_count = 0;
 

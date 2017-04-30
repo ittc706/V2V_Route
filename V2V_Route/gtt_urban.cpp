@@ -32,10 +32,13 @@
 
 using namespace std;
 
-REGISTE_MEMBER_RESOURCE(gtt_urban)
+
+void gtt_urban::set_config(object* t_config) {
+	m_config = (gtt_urban_config*)t_config;
+}
 
 void gtt_urban::initialize() {
-	gtt_urban_config* __config = get_precise_config();
+	gtt_urban_config* __config = get_config();
 	int* m_pupr = new int[__config->get_road_num()];//每条路上的车辆数
 
 	int tempVeUENum = 0;
@@ -128,7 +131,7 @@ int gtt_urban::get_vue_num() {
 
 void gtt_urban::fresh_location() {
 	//<Warn>:将信道刷新时间和位置刷新时间分开
-	if ((*(int*)context::get_context()->get_non_bean(TTI)) % get_precise_config()->get_freshtime() != 0) {
+	if ((*(int*)context::get_context()->get_non_bean(TTI)) % get_config()->get_freshtime() != 0) {
 		return;
 	}
 
@@ -247,8 +250,4 @@ void gtt_urban::calculate_pl(int t_vue_id1, int t_vue_id2) {
 
 	memory_clean::safe_delete(__imta);
 
-}
-
-gtt_urban_config* gtt_urban::get_precise_config() {
-	return (gtt_urban_config*)get_config();
 }

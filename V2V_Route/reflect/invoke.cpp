@@ -4,6 +4,27 @@
 #include"../system_control.h"
 #include"../gtt_highspeed.h"
 #include"../gtt_urban.h"
+#include"../wt.h"
+#include"../tmc.h"
+#include"../route_tcp.h"
+#include"../route_udp.h"
+
+REGISTE_MEMBER_RESOURCE(gtt_urban)
+REGISTE_MEMBER_RESOURCE(gtt_highspeed)
+REGISTE_MEMBER_RESOURCE(wt);
+REGISTE_MEMBER_RESOURCE(tmc);
+
+REGISTE_MEMBER_RESOURCE(global_control_config)
+REGISTE_MEMBER_RESOURCE(gtt_highspeed_config)
+REGISTE_MEMBER_RESOURCE(gtt_urban_config)
+REGISTE_MEMBER_RESOURCE(rrm_config)
+REGISTE_MEMBER_RESOURCE(tmc_config)
+REGISTE_MEMBER_RESOURCE(route_config)
+REGISTE_MEMBER_RESOURCE(system_control)
+REGISTE_MEMBER_RESOURCE(route_tcp)
+REGISTE_MEMBER_RESOURCE(route_udp)
+
+
 
 /*
 * ÁãÔªº¯Êý·´Éä×¢²á
@@ -13,11 +34,17 @@ object* new_instance(const std::string& class_name) {
 		FACTORY_INVOKE(system_control)
 		FACTORY_INVOKE(global_control_config)
 		FACTORY_INVOKE(gtt_highspeed_config)
-
 		FACTORY_INVOKE(gtt_urban_config)
 		FACTORY_INVOKE(rrm_config)
 		FACTORY_INVOKE(tmc_config)
 		FACTORY_INVOKE(route_config)
+
+		FACTORY_INVOKE(gtt_urban)
+		FACTORY_INVOKE(gtt_highspeed)
+		FACTORY_INVOKE(tmc)
+		FACTORY_INVOKE(wt)
+		FACTORY_INVOKE(route_tcp)
+		FACTORY_INVOKE(route_udp)
 
 		return nullptr;
 }
@@ -30,6 +57,14 @@ void invoke(const object* obj, const std::string& method_name) {
 	METHOD_INVOKE_CLASS_START(rrm_config)
 		METHOD_INVOKE_ZERO_PARAM(rrm_config, set_pattern_num)
 		METHOD_INVOKE_CLASS_END(rrm_config)
+
+		METHOD_INVOKE_CLASS_START(gtt_urban)
+		METHOD_INVOKE_ZERO_PARAM(gtt_urban, initialize)
+		METHOD_INVOKE_CLASS_END(gtt_urban)
+
+		METHOD_INVOKE_CLASS_START(gtt_highspeed)
+		METHOD_INVOKE_ZERO_PARAM(gtt_highspeed, initialize)
+		METHOD_INVOKE_CLASS_END(gtt_highspeed)
 }
 
 /*
@@ -125,4 +160,12 @@ void invoke(const object* obj, const std::string& method_name, const std::string
 		METHOD_INVOKE_CLASS_START(route_config)
 		METHOD_INVOKE_ONE_PARAM(route_config, set_interval)
 		METHOD_INVOKE_CLASS_END(route_config)
+}
+
+
+void invoke(const object* obj, const std::string& method_name, object* param1) {
+	long class_id = obj->get_class_id();
+	METHOD_INVOKE_CLASS_START(gtt_urban)
+		METHOD_INVOKE_ONE_PARAM(gtt_urban, set_config)
+		METHOD_INVOKE_CLASS_END(gtt_urban)
 }

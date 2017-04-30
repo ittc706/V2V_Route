@@ -40,9 +40,9 @@ vector<bean_definition*> bean_loader::load() {
 	//根据依赖关系确定有向图访问顺序
 	order_by_dependency(definitions);
 
-	for (bean_definition* definition : definitions) {
-		cout << definition->to_string() << endl;
-	}
+	//for (bean_definition* definition : definitions) {
+	//	cout << definition->to_string() << endl;
+	//}
 
 	return definitions;
 }
@@ -67,9 +67,12 @@ void bean_loader::add_property(bean_definition* definition, const std::string s)
 }
 
 void bean_loader::add_dependency(bean_definition* definition, const std::string s) {
-	const regex REGEX("<dependency +ref-id *= *\"([^\"]+)\" */>");
+	const regex REGEX("<dependency +name *= *\"([^\"]+)\" *, *ref-id *= *\"([^\"]+)\" */>");
 	for (sregex_iterator it(s.begin(), s.end(), REGEX), eof; it != eof; ++it) {
-		definition->dependencies.push_back(it->operator[](1));
+		definition->dependencies.push_back(bean_dependency(
+			it->operator[](1),
+			it->operator[](2)
+			));
 	}
 }
 
@@ -95,13 +98,14 @@ void bean_loader::order_by_dependency(std::vector<bean_definition*>& definitions
 	for (bean_definition* definition : definitions) {
 		string bean_id = definition->id;
 		assert(bean_map.insert({ bean_id,definition }).second);
-		for (string dependency : definition->dependencies) {
-			if (adj_map.find(dependency) == adj_map.end()) {
-				adj_map.insert({ dependency,{ bean_id } });
+		for (bean_dependency dependency : definition->dependencies) {
+			string dependency_bean_id = dependency.ref_id;
+			if (adj_map.find(dependency_bean_id) == adj_map.end()) {
+				adj_map.insert({ dependency_bean_id,{ bean_id } });
 			}
 			else {
-				assert(adj_map[dependency].size() > 0);
-				adj_map[dependency].push_back(bean_id);
+				assert(adj_map[dependency_bean_id].size() > 0);
+				adj_map[dependency_bean_id].push_back(bean_id);
 			}
 		}
 		assert(degree_map.insert({ bean_id,definition->dependencies.size() }).second);

@@ -63,6 +63,11 @@ private:
 	void create_and_init_bean();
 
 	/*
+	* ÒÀÀµ×¢Èë
+	*/
+	void dependency_injection();
+
+	/*
 	* Ô¤´¦ÀíÆ÷
 	*/
 	void pre_process();

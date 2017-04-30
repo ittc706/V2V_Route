@@ -1,6 +1,7 @@
 #pragma once
 #include<string>
 #include"enumeration.h"
+#include"reflect\object.h"
 
 class gtt_config;
 
@@ -18,21 +19,10 @@ public:
 	*/
 	static gtt* gtt_bind_by_mode(gtt_mode t_mode);
 
-	/*--------------------字段--------------------*/
-	/*
-	* 场景配置参数对象
-	*/
-private:
-	gtt_config* m_config;
-	void set_config(gtt_config* t_config) {
-		m_config = t_config;
-	}
-public:
-	gtt_config* get_config() {
-		return m_config;
-	}
-
 	/*--------------------接口--------------------*/
+public:
+	virtual void set_config(object* t_config) = 0;
+
 	/*
 	* 做一些初始化工作
 	*/

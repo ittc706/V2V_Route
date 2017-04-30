@@ -14,9 +14,6 @@
 
 using namespace std;
 
-REGISTE_MEMBER_RESOURCE(route_udp)
-
-
 int route_udp_route_event::s_event_count = 0;
 
 default_random_engine route_udp::s_engine;

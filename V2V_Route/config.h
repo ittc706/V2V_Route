@@ -341,7 +341,6 @@ public:
 private:
 	int m_pattern_num;
 public:
-	//todo
 	void set_pattern_num() {
 		m_pattern_num = get_total_bandwidth() / s_BANDWIDTH_OF_RB / get_rb_num_per_pattern();
 	}
