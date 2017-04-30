@@ -1,11 +1,11 @@
 #pragma once
 #include<string>
 #include"enumeration.h"
-#include"reflect\object.h"
+#include"reflect/object.h"
 
 class gtt_config;
 
-class gtt {
+class gtt:public object {
 	/*------------------友元声明------------------*/
 	/*
 	* 将context设为友元，容器要为其注入依赖项

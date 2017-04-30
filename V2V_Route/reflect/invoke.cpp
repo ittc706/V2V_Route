@@ -65,6 +65,14 @@ void invoke(const object* obj, const std::string& method_name) {
 		METHOD_INVOKE_CLASS_START(gtt_highspeed)
 		METHOD_INVOKE_ZERO_PARAM(gtt_highspeed, initialize)
 		METHOD_INVOKE_CLASS_END(gtt_highspeed)
+
+		METHOD_INVOKE_CLASS_START(route_tcp)
+		METHOD_INVOKE_ZERO_PARAM(route_tcp, initialize)
+		METHOD_INVOKE_CLASS_END(route_tcp)
+
+		METHOD_INVOKE_CLASS_START(wt)
+		METHOD_INVOKE_ZERO_PARAM(wt, set_resource)
+		METHOD_INVOKE_CLASS_END(wt)
 }
 
 /*
@@ -168,4 +176,12 @@ void invoke(const object* obj, const std::string& method_name, object* param1) {
 	METHOD_INVOKE_CLASS_START(gtt_urban)
 		METHOD_INVOKE_ONE_PARAM(gtt_urban, set_config)
 		METHOD_INVOKE_CLASS_END(gtt_urban)
+
+		METHOD_INVOKE_CLASS_START(route_tcp)
+		METHOD_INVOKE_ONE_PARAM(route_tcp, set_gtt)
+		METHOD_INVOKE_CLASS_END(route_tcp)
+
+		METHOD_INVOKE_CLASS_START(route_udp)
+		METHOD_INVOKE_ONE_PARAM(route_udp, set_gtt)
+		METHOD_INVOKE_CLASS_END(route_udp)
 }

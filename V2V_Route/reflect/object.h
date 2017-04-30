@@ -21,7 +21,11 @@ public:
 	}
 
 public:
-	long get_class_id() const {
+	/*
+	* 获取类型标记
+	* 将其设置为虚函数,非常神奇,可以消除由于子类继承自带有虚函数的其他基类所造成的的内存偏移
+	*/
+	virtual long get_class_id() const {
 		return *((long*)((char*)this - sizeof(long)));
 	}
 

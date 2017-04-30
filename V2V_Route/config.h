@@ -2,7 +2,7 @@
 #include<vector>
 #include<string>
 #include<stdexcept>
-#include"reflect\object.h"
+#include"reflect/object.h"
 #include"enumeration.h"
 
 #define INVALID -1

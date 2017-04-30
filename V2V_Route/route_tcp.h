@@ -9,8 +9,8 @@
 #include<string>
 #include"route.h"
 #include"config.h"
-#include"reflect\object.h"
-#include"reflect\context.h"
+#include"reflect/object.h"
+#include"reflect/context.h"
 
 
 enum route_response_state{
@@ -348,7 +348,7 @@ public:
 	std::pair<int,int> select_relay_information();
 };
 
-class route_tcp :public object,public route {
+class route_tcp :public route {
 	REGISTE_MEMBER_HEAD(route_tcp)
 	/*
 	* 让context容器提供依赖注入
@@ -419,6 +419,17 @@ public:
 	* 构造函数
 	*/
 	route_tcp();
+
+private:
+	gtt* m_gtt;
+public:
+	void set_gtt(object* t_gtt)override {
+		m_gtt = (gtt*)t_gtt;
+	}
+
+	gtt* get_gtt() override {
+		return m_gtt;
+	}
 
 	/*
 	* 初始化

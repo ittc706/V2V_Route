@@ -9,7 +9,7 @@
 #include"vue.h"
 #include"vue_physics.h"
 #include"function.h"
-#include"reflect\context.h"
+#include"reflect/context.h"
 #include"non_bean_id.h"
 
 using namespace std;
@@ -120,7 +120,7 @@ pair<int, int> route_udp_node::select_relay_information() {
 		if (candidate.size() != 0) {
 			//在未占用的频段上随机挑选一个
 			//<Warn>可以增加其他算法
-			uniform_int_distribution<int> u(0, candidate.size() - 1);
+			uniform_int_distribution<int> u(0, static_cast<int>(candidate.size()) - 1);
 			res.second = candidate[u(s_engine)];
 		}
 	}
@@ -156,6 +156,8 @@ string route_udp::pattern_state_to_string(route_udp_pattern_state t_pattern_stat
 		return "SENDING";
 	case RECEIVING_UDP:
 		return "RECEIVING";
+	default:
+		throw logic_error("error");
 	}
 }
 

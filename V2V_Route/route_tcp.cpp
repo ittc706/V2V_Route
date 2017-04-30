@@ -9,7 +9,7 @@
 #include"vue.h"
 #include"vue_physics.h"
 #include"function.h"
-#include"reflect\context.h"
+#include"reflect/context.h"
 #include"non_bean_id.h"
 
 using namespace std;
@@ -102,7 +102,7 @@ pair<int, int> route_tcp_node::select_relay_information() {
 	if (candidate.size() != 0) {
 		//在未占用的频段上随机挑选一个
 		//<Warn>可以增加其他算法
-		uniform_int_distribution<int> u(0, candidate.size() - 1);
+		uniform_int_distribution<int> u(0, static_cast<int>(candidate.size()) - 1);
 		res.second = candidate[u(s_engine)];
 	}
 
@@ -143,6 +143,8 @@ string route_tcp::pattern_state_to_string(route_tcp_pattern_state t_pattern_stat
 		return "SENDING";
 	case RECEIVING:
 		return "RECEIVING";
+	default:
+		throw logic_error("error");
 	}
 }
 
@@ -167,7 +169,8 @@ route_tcp::route_tcp() {
 
 void route_tcp::initialize() {
 	context* __context = context::get_context();
-	int vue_num = ((gtt*)__context->get_bean("gtt"))->get_vue_num();
+	gtt* ggg = get_gtt();
+	int vue_num = get_gtt()->get_vue_num();
 	m_node_array = new route_tcp_node[vue_num];
 
 	if (((global_control_config*)__context->get_bean("global_control_config"))->get_platform() == Windows) {
@@ -379,7 +382,7 @@ void route_tcp::send_ack() {
 			}
 			else {
 				/*首先选择一个节点响应ack请求*/
-				uniform_int_distribution<int> u(0, relay_node.m_last_round_request_per_pattern[pattern_idx].size() - 1);
+				uniform_int_distribution<int> u(0, static_cast<int>(relay_node.m_last_round_request_per_pattern[pattern_idx].size()) - 1);
 				int selected_source_node_id = relay_node.m_last_round_request_per_pattern[pattern_idx][u(s_engine)];
 
 				route_tcp_node& selected_source_node = get_node_array()[selected_source_node_id];

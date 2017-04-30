@@ -40,10 +40,6 @@ vector<bean_definition*> bean_loader::load() {
 	//根据依赖关系确定有向图访问顺序
 	order_by_dependency(definitions);
 
-	//for (bean_definition* definition : definitions) {
-	//	cout << definition->to_string() << endl;
-	//}
-
 	return definitions;
 }
 
@@ -132,10 +128,3 @@ void bean_loader::order_by_dependency(std::vector<bean_definition*>& definitions
 	}
 	definitions.swap(temp);
 }
-
-
-//int main() {
-//	bean_loader bl("E:\\CppProgram\\Reflect\\Reflect\\pattern2\\beans.xml");
-//	bl.load();
-//	system("pause");
-//}

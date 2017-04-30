@@ -1,10 +1,10 @@
 #pragma once
-#include"reflect\object.h"
+#include"reflect/object.h"
 #include"gtt.h"
 
 class gtt_highspeed_config;
 
-class gtt_highspeed :public object, public gtt {
+class gtt_highspeed :public gtt {
 	REGISTE_MEMBER_HEAD(gtt_highspeed)
 private:
 	gtt_highspeed_config* m_config;

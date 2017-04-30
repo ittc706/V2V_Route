@@ -1,5 +1,6 @@
 #pragma once
 #include"enumeration.h"
+#include"gtt.h"
 
 enum route_transimit_state {
 	SUCCESS,
@@ -11,7 +12,7 @@ struct event_trigger_dto {
 	int destination_vue_id;
 };
 
-class route{
+class route:public object {
 	/*------------------友元声明------------------*/
 	/*
 	* 将context设为友元，容器要为其注入依赖项
@@ -23,7 +24,11 @@ class route{
 	* 根据gtt模式来生成gtt组件对象
 	*/
 	static route* route_bind_by_mode(route_mode t_mode);
+
 public:
+	virtual void set_gtt(object* t_gtt) = 0;
+	
+	virtual gtt* get_gtt() = 0;
 	/*
 	* 初始化
 	*/

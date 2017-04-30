@@ -5,7 +5,7 @@
 #include"object.h"
 #include"bean_loader.h"
 #include"bean_definition.h"
-
+#include"../enumeration.h"
 
 /*
 * 容器类
@@ -38,12 +38,12 @@ private:
 	* 单例模式,私有化构造函数
 	*/
 private:
-	static context* __context;
+	static context* singleton;
 private:
 	context(const std::string& path);
 public:
 	~context();
-	static void create_context(const std::string& path);
+	static void create_context(platform t_platform);
 	static context* get_context();
 
 private:
@@ -55,7 +55,7 @@ private:
 	/*
 	* 解析配置文件
 	*/
-	void parseConfiguration();
+	void parse_configuration();
 
 	/*
 	* 按照指定顺序初始化所有bean

@@ -9,8 +9,8 @@
 #include<string>
 #include"route.h"
 #include"config.h"
-#include"reflect\object.h"
-#include"reflect\context.h"
+#include"reflect/object.h"
+#include"reflect/context.h"
 
 using namespace std;
 
@@ -388,7 +388,7 @@ public:
 	std::pair<int, int> select_relay_information();
 };
 
-class route_udp :public object, public route {
+class route_udp :public route {
 	REGISTE_MEMBER_HEAD(route_udp)
 	/*
 	* 让context容器提供依赖注入
@@ -485,6 +485,16 @@ public:
 	*/
 	route_udp();
 
+private:
+	gtt* m_gtt;
+public:
+	void set_gtt(object* t_gtt)override {
+		m_gtt = (gtt*)t_gtt;
+	}
+
+	gtt* get_gtt() override {
+		return m_gtt;
+	}
 	/*
 	* 初始化
 	*/
