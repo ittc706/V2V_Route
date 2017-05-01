@@ -4,13 +4,9 @@
 #include"reflect/object.h"
 
 class gtt_config;
+class vue;
 
 class gtt:public object {
-	/*------------------友元声明------------------*/
-	/*
-	* 将context设为友元，容器要为其注入依赖项
-	*/
-	friend class context;
 
 	/*--------------------静态--------------------*/
 public:
@@ -21,7 +17,15 @@ public:
 
 	/*--------------------接口--------------------*/
 public:
+	/*
+	* 设置配置文件,不同的实现需要不同的配置文件，因此设为虚函数
+	*/
 	virtual void set_config(object* t_config) = 0;
+
+	/*
+	* 获取车辆数组指针
+	*/
+	virtual vue* get_vue_array() = 0;
 
 	/*
 	* 做一些初始化工作

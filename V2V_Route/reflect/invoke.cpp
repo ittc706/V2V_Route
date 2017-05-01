@@ -171,7 +171,15 @@ void invoke(const object* obj, const std::string& method_name, const std::string
 
 void invoke(const object* obj, const std::string& method_name, object* param1) {
 	long class_id = obj->get_class_id();
-	METHOD_INVOKE_CLASS_START(gtt_urban)
+	METHOD_INVOKE_CLASS_START(system_control)
+		METHOD_INVOKE_ONE_PARAM(system_control, set_gtt)
+		METHOD_INVOKE_ONE_PARAM(system_control, set_route)
+		METHOD_INVOKE_ONE_PARAM(system_control, set_tmc)
+		METHOD_INVOKE_ONE_PARAM(system_control, set_wt)
+		METHOD_INVOKE_CLASS_END(system_control)
+
+	
+		METHOD_INVOKE_CLASS_START(gtt_urban)
 		METHOD_INVOKE_ONE_PARAM(gtt_urban, set_config)
 		METHOD_INVOKE_CLASS_END(gtt_urban)
 

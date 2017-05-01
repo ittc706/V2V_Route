@@ -59,7 +59,7 @@ void gtt_urban::initialize() {
 	}
 
 	//进行车辆的撒点
-	context::get_context()->add_non_bean(VUE_ARRAY, new vue[tempVeUENum]);
+	m_vue_array=new vue[tempVeUENum];
 	cout << "vuenum: " << tempVeUENum << endl;
 
 	int vue_id = 0;
@@ -77,11 +77,9 @@ void gtt_urban::initialize() {
 	default_random_engine e((unsigned)time(0));
 	uniform_real_distribution<double> u(0, 2 * (__config->get_road_length_ew() + __config->get_road_length_sn()));
 
-	vue* vue_array = (vue*)context::get_context()->get_non_bean(VUE_ARRAY);
-
 	for (int RoadIdx = 0; RoadIdx != __config->get_road_num(); RoadIdx++) {
 		for (int uprIdx = 0; uprIdx != m_pupr[RoadIdx]; uprIdx++) {
-			auto p = vue_array[vue_id++].get_physics_level();
+			auto p = get_vue_array()[vue_id++].get_physics_level();
 			DistanceFromBottomLeft = u(e);
 			if (DistanceFromBottomLeft <= __config->get_road_length_ew()) {
 				p->m_relx = -(__config->get_road_length_sn() + __config->get_road_width()) / 2;
@@ -135,16 +133,14 @@ void gtt_urban::fresh_location() {
 		return;
 	}
 
-	vue* vue_array = (vue*)context::get_context()->get_non_bean(VUE_ARRAY);
-
 	for (int vue_id = 0; vue_id < get_vue_num(); vue_id++) {
-		vue_array[vue_id].get_physics_level()->update_location_urban();
+		get_vue_array()[vue_id].get_physics_level()->update_location_urban();
 	}
 
 	for (int vue_id1 = 0; vue_id1 < get_vue_num(); vue_id1++) {
 		for (int vue_id2 = 0; vue_id2 < vue_id1; vue_id2++) {
-			auto vuei = vue_array[vue_id1].get_physics_level();
-			auto vuej = vue_array[vue_id2].get_physics_level();
+			auto vuei = get_vue_array()[vue_id1].get_physics_level();
+			auto vuej = get_vue_array()[vue_id2].get_physics_level();
 			vue_physics::set_distance(vue_id2, vue_id1, sqrt(pow((vuei->m_absx - vuej->m_absx), 2.0f) + pow((vuei->m_absy - vuej->m_absy), 2.0f)));
 			calculate_pl(vue_id1, vue_id2);
 		}
@@ -169,10 +165,8 @@ void gtt_urban::calculate_pl(int t_vue_id1, int t_vue_id2) {
 
 	imta* __imta = new imta();
 
-	vue* vue_array = (vue*)context::get_context()->get_non_bean(VUE_ARRAY);
-
-	auto vuei = vue_array[t_vue_id1].get_physics_level();
-	auto vuej = vue_array[t_vue_id2].get_physics_level();
+	auto vuei = get_vue_array()[t_vue_id1].get_physics_level();
+	auto vuej = get_vue_array()[t_vue_id2].get_physics_level();
 
 	//判断车辆运动方向是东西方向还是南北方向，true代表东西方向，false代表南北方向
 	bool v_diri, v_dirj;

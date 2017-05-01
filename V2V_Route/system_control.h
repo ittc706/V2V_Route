@@ -2,25 +2,67 @@
 #include"reflect/object.h"
 
 class context;
+class gtt;
+class route;
+class wt;
+class tmc;
 
 class system_control:public object {
 	REGISTE_MEMBER_HEAD(system_control)
-	/*------------------友元声明------------------*/
-	/*
-	* 将容器类作为友元，以提供依赖注入的权限
-	*/
-	friend class context;
 
 	/*------------------私有字段------------------*/
+
 private:
 	/*
-	* 持有容器的指针
+	* gtt模块控制器
 	*/
-	context* m_context = nullptr;
-	void set_context(context* t_context);
+	gtt* m_gtt;
+	void set_gtt(object* t_gtt) {
+		m_gtt = (gtt*)t_gtt;
+	}
 public:
-	context* get_context();
+	gtt* get_gtt() {
+		return m_gtt;
+	}
 
+	/*
+	* route模块控制器
+	*/
+private:
+	route* m_route;
+	void set_route(object* t_route) {
+		m_route = (route*)t_route;
+	}
+public:
+	route* get_route() {
+		return m_route;
+	}
+
+	/*
+	* tmc模块控制器
+	*/
+private:
+	tmc* m_tmc;
+	void set_tmc(object* t_tmc) {
+		m_tmc = (tmc*)t_tmc;
+	}
+public:
+	tmc* get_tmc() {
+		return m_tmc;
+	}
+
+	/*
+	* wt模块控制器
+	*/
+private:
+	wt* m_wt;
+	void set_wt(object* t_wt) {
+		m_wt = (wt*)t_wt;
+	}
+public:
+	wt* get_wt() {
+		return m_wt;
+	}
 
 	/*----------------拷贝控制成员----------------*/
 public:

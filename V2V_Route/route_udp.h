@@ -390,10 +390,6 @@ public:
 
 class route_udp :public route {
 	REGISTE_MEMBER_HEAD(route_udp)
-	/*
-	* ÈÃcontextÈİÆ÷Ìá¹©ÒÀÀµ×¢Èë
-	*/
-	friend class context;
 
 private:
 	/*

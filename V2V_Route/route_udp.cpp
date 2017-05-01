@@ -173,7 +173,7 @@ void route_udp::log_link(int t_source_node_id, int t_relay_node_id, std::string 
 	string lost_reason2 = "连接性不好";
 	bool lost_reason = false;
 	
-	vue* vue_array = (vue*)context::get_context()->get_non_bean(VUE_ARRAY);
+	vue* vue_array = ((gtt*)context::get_context()->get_non_bean("gtt"))->get_vue_array();
 
 	s_logger_link << "TTI[" << left << setw(3) << (*(int*)context::get_context()->get_non_bean(TTI)) << "] - ";
 	s_logger_link << "link[" << left << setw(3) << t_source_node_id << ", ";
@@ -442,6 +442,7 @@ void route_udp::start_sending_data() {
 }
 
 void route_udp::transmit_data() {
+
 	//对所有link_event进行第一遍遍历。目的1：传输所有事件。目的2：维护接收节点传输pattern的状态
 	for (int source_node_id = 0; source_node_id < route_udp_node::s_node_count; source_node_id++) {
 		route_udp_node& source_node = get_node_array()[source_node_id];
@@ -535,8 +536,6 @@ void route_udp::transmit_data() {
 					route_udp_node::s_node_id_per_pattern[pattern_idx].erase(source_node_id);
 				}
 
-				vue* vue_array = (vue*)context::get_context()->get_non_bean(VUE_ARRAY);
-
 				//判断是否丢包
 				if ((*it)->get_is_loss()) {
 					if (source_node.m_send_event_queue.front()->get_route_event_type() == DATA) {//如果是数据事件，且收发距离小于500m，则记录该link_event
@@ -555,10 +554,10 @@ void route_udp::transmit_data() {
 							temp.pattern_id = pattern_idx;
 							temp.sinr = (*it)->sinr_per_tti;
 							temp.infer_node_id = route_udp_node::s_node_id_per_pattern[pattern_idx];
-							temp.send_node_x = vue_array[destination_node.get_id()].get_physics_level()->m_absx;
-							temp.send_node_y = vue_array[destination_node.get_id()].get_physics_level()->m_absy;
-							temp.receive_node_x = vue_array[source_node_id].get_physics_level()->m_absx;
-							temp.receive_node_y = vue_array[source_node_id].get_physics_level()->m_absy;
+							temp.send_node_x = get_gtt()->get_vue_array()[destination_node.get_id()].get_physics_level()->m_absx;
+							temp.send_node_y = get_gtt()->get_vue_array()[destination_node.get_id()].get_physics_level()->m_absy;
+							temp.receive_node_x = get_gtt()->get_vue_array()[source_node_id].get_physics_level()->m_absx;
+							temp.receive_node_y = get_gtt()->get_vue_array()[source_node_id].get_physics_level()->m_absy;
 							temp.pl = vue_physics::get_pl(source_node_id, destination_node.get_id());
 
 							log_link(source_node_id, (*it)->get_destination_node_id(), "FAILED", loss_reason, source_node.m_adjacent_list[count].second, temp);
@@ -628,10 +627,10 @@ void route_udp::transmit_data() {
 						temp.life_time = (*(int*)context::get_context()->get_non_bean(TTI));
 						temp.infer_node_id = route_udp_node::s_node_id_per_pattern[pattern_idx];
 						temp.sinr = (*it)->sinr_per_tti;
-						temp.receive_node_x = vue_array[destination_node.get_id()].get_physics_level()->m_absx;
-						temp.receive_node_y = vue_array[destination_node.get_id()].get_physics_level()->m_absy;
-						temp.send_node_x = vue_array[source_node_id].get_physics_level()->m_absx;
-						temp.send_node_y = vue_array[source_node_id].get_physics_level()->m_absy;
+						temp.receive_node_x = get_gtt()->get_vue_array()[destination_node.get_id()].get_physics_level()->m_absx;
+						temp.receive_node_y = get_gtt()->get_vue_array()[destination_node.get_id()].get_physics_level()->m_absy;
+						temp.send_node_x = get_gtt()->get_vue_array()[source_node_id].get_physics_level()->m_absx;
+						temp.send_node_y = get_gtt()->get_vue_array()[source_node_id].get_physics_level()->m_absy;
 						temp.pl = vue_physics::get_pl(destination_node.get_id(), source_node_id);
 
 						destination_node.add_to_adjacent_list(source_node.get_id(),temp);

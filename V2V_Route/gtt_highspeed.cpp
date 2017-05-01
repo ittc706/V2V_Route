@@ -68,7 +68,7 @@ void gtt_highspeed::initialize() {
 	}
 
 	//进行车辆的撒点
-	context::get_context()->add_non_bean(VUE_ARRAY, new vue[tempVeUENum]);
+	m_vue_array = new vue[tempVeUENum];
 	int vue_id = 0;
 
 	/*ofstream vue_coordinate;
@@ -82,7 +82,7 @@ void gtt_highspeed::initialize() {
 
 	for (int roadId = 0; roadId != __config->get_road_num(); roadId++) {
 		for (int uprIdx = 0; uprIdx != m_pupr[roadId]; uprIdx++) {
-			auto p = ((vue*)context::get_context()->get_non_bean(VUE_ARRAY))[vue_id++].get_physics_level();
+			auto p = get_vue_array()[vue_id++].get_physics_level();
 			p->m_speed = __config->get_speed()/3.6;
 		    p->m_absx = -1732 + (TotalTime[roadId] - possion[roadId].back())*(p->m_speed);
 			p->m_absy = __config->get_road_topo_ratio()[roadId * 2 + 1]* __config->get_road_width();
@@ -132,14 +132,11 @@ void gtt_highspeed::fresh_location() {
 	if ((*(int*)context::get_context()->get_non_bean(TTI)) % get_config()->get_freshtime() != 0) {
 		return;
 	}
-
-	vue* vue_array = (vue*)context::get_context()->get_non_bean(VUE_ARRAY);
-
 	for (int vue_id = 0; vue_id < get_vue_num(); vue_id++) {
-		vue_array[vue_id].get_physics_level()->update_location_highspeed();
+		get_vue_array()[vue_id].get_physics_level()->update_location_highspeed();
 
 		//每次更新车辆位置时重新判断车辆所在的zone_idx
-		auto p = vue_array[vue_id].get_physics_level();
+		auto p = get_vue_array()[vue_id].get_physics_level();
 		int granularity = ((rrm_config*)context::get_context()->get_bean("rrm_config"))->get_time_division_granularity();
 		if (granularity == 2) {
 			double zone_length = 346.41;
@@ -155,8 +152,8 @@ void gtt_highspeed::fresh_location() {
 
 	for (int vue_id1 = 0; vue_id1 < get_vue_num(); vue_id1++) {
 		for (int vue_id2 = 0; vue_id2 < vue_id1; vue_id2++) {
-			auto vuei = vue_array[vue_id1].get_physics_level();
-			auto vuej = vue_array[vue_id2].get_physics_level();
+			auto vuei = get_vue_array()[vue_id1].get_physics_level();
+			auto vuej = get_vue_array()[vue_id2].get_physics_level();
 			vue_physics::set_distance(vue_id2, vue_id1, sqrt(pow((vuei->m_absx - vuej->m_absx), 2.0f) + pow((vuei->m_absy - vuej->m_absy), 2.0f)));
 			calculate_pl(vue_id1, vue_id2);
 		}
@@ -182,10 +179,8 @@ void gtt_highspeed::calculate_pl(int t_vue_id1, int t_vue_id2) {
 
 	imta* __imta = new imta();
 
-	vue* vue_array = (vue*)context::get_context()->get_non_bean(VUE_ARRAY);
-
-	auto vuei = vue_array[t_vue_id1].get_physics_level();
-	auto vuej = vue_array[t_vue_id2].get_physics_level();
+	auto vuei = get_vue_array()[t_vue_id1].get_physics_level();
+	auto vuej = get_vue_array()[t_vue_id2].get_physics_level();
 
 	_location.locationType = Los;
 	_location.manhattan = false;

@@ -13,11 +13,6 @@ struct event_trigger_dto {
 };
 
 class route:public object {
-	/*------------------友元声明------------------*/
-	/*
-	* 将context设为友元，容器要为其注入依赖项
-	*/
-	friend class context;
 
 	/*--------------------静态--------------------*/
 	/*

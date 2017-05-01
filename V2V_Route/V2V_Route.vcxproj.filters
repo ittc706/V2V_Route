@@ -84,6 +84,9 @@
     <ClInclude Include="reflect\invoke.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="time_stamp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="gtt.cpp">

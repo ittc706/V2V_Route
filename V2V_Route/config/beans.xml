@@ -1,9 +1,13 @@
 <bean id="system_control", class="system_control">
+	<dependency name="gtt", ref-id="gtt"/>
+	<dependency name="route", ref-id="route"/>
+	<dependency name="tmc", ref-id="tmc"/>
+	<dependency name="wt", ref-id="wt"/>
 </bean>
 
 <bean id="global_control_config", class="global_control_config">
 	<property name="platform", value="Windows"/>
-	<property name="ntti", value="1000"/>
+	<property name="ntti", value="10"/>
 </bean>
 
 

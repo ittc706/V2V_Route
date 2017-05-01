@@ -132,6 +132,7 @@
     <ClInclude Include="route_tcp.h" />
     <ClInclude Include="route_udp.h" />
     <ClInclude Include="system_control.h" />
+    <ClInclude Include="time_stamp.h" />
     <ClInclude Include="tmc.h" />
     <ClInclude Include="vue.h" />
     <ClInclude Include="vue_physics.h" />

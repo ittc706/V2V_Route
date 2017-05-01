@@ -350,10 +350,6 @@ public:
 
 class route_tcp :public route {
 	REGISTE_MEMBER_HEAD(route_tcp)
-	/*
-	* ÈÃcontextÈİÆ÷Ìá¹©ÒÀÀµ×¢Èë
-	*/
-	friend class context;
 
 private:
 	/*

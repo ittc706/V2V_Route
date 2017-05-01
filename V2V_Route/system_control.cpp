@@ -29,20 +29,12 @@
 
 using namespace std;
 
-void system_control::set_context(context* t_context) {
-	m_context = t_context;
-}
-
-context* system_control::get_context() {
-	return m_context;
-}
-
 system_control::system_control() {
 
 }
 
 system_control::~system_control() {
-	memory_clean::safe_delete(m_context);
+	
 }
 
 void system_control::process() {
@@ -53,15 +45,15 @@ void system_control::process() {
 		cout << "TTI: " << (*(int*)context::get_context()->get_non_bean(TTI)) << endl;
 
 		//车辆运动
-		((gtt*)context::get_context()->get_bean("gtt"))->fresh_location();
+		get_gtt()->fresh_location();
 
 		//路由层更新
-		((route*)context::get_context()->get_bean("route"))->process_per_tti();
+		get_route()->process_per_tti();
 
 		++(*(int*)context::get_context()->get_non_bean(TTI));
 	}
 
-	((tmc*)context::get_context()->get_bean("tmc"))->statistic();
+	get_tmc()->statistic();
 
 	delete ptti;
 }
