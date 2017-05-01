@@ -254,7 +254,7 @@ public:
 private:
 	int m_total_bandwidth;
 	void set_total_bandwidth(std::string t_total_bandwidth) {
-		m_total_bandwidth = stoi(t_total_bandwidth);
+		m_total_bandwidth = stoi(t_total_bandwidth) * 1000 * 1000;
 	}
 public:
 	int get_total_bandwidth() {
@@ -280,7 +280,7 @@ public:
 private:
 	int m_pattern_num;
 	void set_pattern_num() {
-		m_pattern_num = get_total_bandwidth() * 1000000 / s_BANDWIDTH_OF_RB / get_rb_num_per_pattern();
+		m_pattern_num = get_total_bandwidth() / s_BANDWIDTH_OF_RB / get_rb_num_per_pattern();
 	}
 public:
 	int get_pattern_num() {

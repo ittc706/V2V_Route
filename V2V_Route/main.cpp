@@ -12,10 +12,6 @@
 #include"enumeration.h"
 using namespace std;
 
-class A{
-public:
-	static void f() {}
-};
 
 int main() {
 	/*cout <<"gtt_urban: "<< gtt_urban::class_id << endl;
@@ -41,7 +37,7 @@ int main() {
 	object* obj4 = gtt_highspeed::new_instance();
 	cout << obj4->get_class_id() << endl;*/
 
-	context::create_context("config/beans1.xml");
+	context::create_context("config/beans3.xml");
 	context *__context = context::get_context();
 
 	system_control *__system = (system_control *)__context->get_bean("system_control");
