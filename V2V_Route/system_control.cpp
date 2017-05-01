@@ -25,24 +25,15 @@
 #include"vue.h"
 #include"route.h"
 #include"reflect/context.h"
-#include"non_bean_id.h"
+#include"time_stamp.h"
 
 using namespace std;
 
-system_control::system_control() {
-
-}
-
-system_control::~system_control() {
-	
-}
-
 void system_control::process() {
 	int *ptti = new int(0);
-	context::get_context()->add_non_bean(TTI, ptti);
 
-	while ((*(int*)context::get_context()->get_non_bean(TTI)) < ((global_control_config*)context::get_context()->get_bean("global_control_config"))->get_ntti()) {
-		cout << "TTI: " << (*(int*)context::get_context()->get_non_bean(TTI)) << endl;
+	while (get_time()->get_tti() < get_global_control_config()->get_ntti()) {
+		cout << "TTI: " << get_time()->get_tti() << endl;
 
 		//车辆运动
 		get_gtt()->fresh_location();
@@ -50,7 +41,7 @@ void system_control::process() {
 		//路由层更新
 		get_route()->process_per_tti();
 
-		++(*(int*)context::get_context()->get_non_bean(TTI));
+		get_time()->increasement();
 	}
 
 	get_tmc()->statistic();

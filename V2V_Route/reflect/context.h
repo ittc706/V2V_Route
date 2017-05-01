@@ -23,11 +23,6 @@ private:
 	std::unordered_map<std::string, object*> bean_map;
 
 	/*
-	* 不是通过配置文件配置的对象
-	*/
-	std::unordered_map<std::string, void*> non_bean_map;
-
-	/*
 	* 配置文件加载器
 	*/
 	bean_loader* loader = nullptr;
@@ -78,7 +73,4 @@ private:
 	void post_process();
 public:
 	object* get_bean(std::string bean_id);
-
-	void add_non_bean(std::string bean_id, void* non_bean);
-	void* get_non_bean(std::string bean_id);
 };

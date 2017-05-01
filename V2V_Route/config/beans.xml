@@ -1,22 +1,15 @@
-<bean id="system_control", class="system_control">
-	<dependency name="gtt", ref-id="gtt"/>
-	<dependency name="route", ref-id="route"/>
-	<dependency name="tmc", ref-id="tmc"/>
-	<dependency name="wt", ref-id="wt"/>
-</bean>
-
 <bean id="global_control_config", class="global_control_config">
 	<property name="platform", value="Windows"/>
 	<property name="ntti", value="10"/>
 </bean>
-
-
 
 <bean id="gtt_highspeed_config", class="gtt_highspeed_config">
 	<property name="road_length", value="3464"/>
 	<property name="road_width", value="4.0"/>
 	<property name="speed", value="140"/>
 	<property name="freshtime", value="100"/>
+	
+	<dependency name="time", ref-id="time"/>
 </bean>
 
 <bean id="gtt_urban_config", class="gtt_urban_config">
@@ -25,6 +18,8 @@
 	<property name="road_width", value="7.0"/>
 	<property name="speed", value="30"/>
 	<property name="freshtime", value="500"/>
+	
+	<dependency name="time", ref-id="time"/>
 </bean>
 
 <bean id="rrm_config", class="rrm_config">
@@ -55,9 +50,28 @@
 	<property name="interval", value="1000"/>
 </bean>
 
+<bean id="time", class="v2x_time">
+	<property name="tti", value="0"/>
+</bean>
+
+<bean id="system_control", class="system_control">
+	<dependency name="time", ref-id="time"/>
+	<dependency name="gtt", ref-id="gtt"/>
+	<dependency name="route", ref-id="route"/>
+	<dependency name="tmc", ref-id="tmc"/>
+	<dependency name="wt", ref-id="wt"/>
+	<dependency name="global_control_config", ref-id="global_control_config"/>
+</bean>
 
 <bean id="gtt", class="gtt_urban">	
 	<dependency name="config", ref-id="gtt_urban_config"/>
+	<dependency name="time", ref-id="time"/>
+	<post-processor method_name="initialize"/>
+</bean>
+
+<bean id="route", class="route_tcp">	
+	<dependency name="gtt", ref-id="gtt"/>
+	<dependency name="time", ref-id="time"/>
 	<post-processor method_name="initialize"/>
 </bean>
 
@@ -69,9 +83,6 @@
 	<post-processor method_name="set_resource"/>
 </bean>
 
-<bean id="route", class="route_tcp">	
-	<dependency name="gtt", ref-id="gtt"/>
-	<post-processor method_name="initialize"/>
-</bean>
+
 
 

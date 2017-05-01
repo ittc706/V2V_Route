@@ -45,14 +45,6 @@ void wt::set_resource() {
 	in.close();
 }
 
-wt::wt() {
-
-}
-
-wt::~wt() {
-
-}
-
 double wt::calculate_sinr(int t_send_vue_id, int t_receive_vue_id, int t_pattern_idx, const std::set<int>& t_sending_vue_id_set) {
 	m_ploss = vue_physics::get_pl(t_send_vue_id, t_receive_vue_id);
 	int subcarrier_num = ((rrm_config*)context::get_context()->get_bean("rrm_config"))->get_rb_num_per_pattern() * 12;

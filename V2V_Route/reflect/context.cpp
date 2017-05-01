@@ -52,7 +52,11 @@ void context::create_and_init_bean() {
 		string bean_id = definition->id;
 		string class_type = definition->class_type;
 		object* _obj = new_instance(class_type);
-		assert(_obj != nullptr);
+		if (_obj == nullptr) {
+			cout << "类型 <" << class_type << ">尚未注册工厂方法，请于 object* new_instance(const std::string& class_name) 方法中完成注册" << endl;
+			system("pause");
+			exit(0);
+		}
 		assert(bean_map.insert({ bean_id ,_obj }).second);
 		for (bean_property p : definition->properties) {
 			invoke(_obj, "set_" + p.name, p.value);
@@ -95,14 +99,4 @@ void context::post_process() {
 object* context::get_bean(std::string bean_id) {
 	assert(bean_map.find(bean_id) != bean_map.end());
 	return bean_map[bean_id];
-}
-
-void context::add_non_bean(std::string bean_id,void* non_bean) {
-	assert(non_bean_map.find(bean_id) == non_bean_map.end());
-	non_bean_map.insert({ bean_id ,non_bean });
-}
-
-void* context::get_non_bean(std::string bean_id) {
-	assert(non_bean_map.find(bean_id) != non_bean_map.end());
-	return non_bean_map[bean_id];
 }

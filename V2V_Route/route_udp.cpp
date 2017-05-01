@@ -10,7 +10,7 @@
 #include"vue_physics.h"
 #include"function.h"
 #include"reflect/context.h"
-#include"non_bean_id.h"
+#include"time_stamp.h"
 
 using namespace std;
 
@@ -139,7 +139,8 @@ void route_udp::log_node_pattern(int t_source_node_id,
 	route_udp_pattern_state t_from_pattern_state,
 	route_udp_pattern_state t_to_pattern_state,
 	string t_description) {
-	s_logger_pattern << "TTI[" << left << setw(3) << (*(int*)context::get_context()->get_non_bean(TTI)) << "] - ";
+	v2x_time* __time = (v2x_time*)context::get_context()->get_bean("time");
+	s_logger_pattern << "TTI[" << left << setw(3) << __time->get_tti() << "] - ";
 	s_logger_pattern << "link[" << left << setw(3) << t_source_node_id << ", ";
 	s_logger_pattern << left << setw(3) << t_relay_node_id << "] - ";
 	s_logger_pattern << "node[" << left << setw(3) << t_cur_node_id << "] - ";
@@ -162,7 +163,8 @@ string route_udp::pattern_state_to_string(route_udp_pattern_state t_pattern_stat
 }
 
 void route_udp::log_event(int t_origin_node_id, int t_fianl_destination_node_id) {
-	s_logger_event << "TTI[" << left << setw(3) << (*(int*)context::get_context()->get_non_bean(TTI)) << "] - ";
+	v2x_time* __time = (v2x_time*)context::get_context()->get_bean("time");
+	s_logger_event << "TTI[" << left << setw(3) << __time->get_tti() << "] - ";
 	s_logger_event << "trigger[" << left << setw(3) << t_origin_node_id << ", ";
 	s_logger_event << left << setw(3) << t_fianl_destination_node_id << "]" << endl;
 
@@ -173,9 +175,10 @@ void route_udp::log_link(int t_source_node_id, int t_relay_node_id, std::string 
 	string lost_reason2 = "连接性不好";
 	bool lost_reason = false;
 	
-	vue* vue_array = ((gtt*)context::get_context()->get_non_bean("gtt"))->get_vue_array();
+	v2x_time* __time = (v2x_time*)context::get_context()->get_bean("time");
+	vue* vue_array = ((gtt*)context::get_context()->get_bean("gtt"))->get_vue_array();
 
-	s_logger_link << "TTI[" << left << setw(3) << (*(int*)context::get_context()->get_non_bean(TTI)) << "] - ";
+	s_logger_link << "TTI[" << left << setw(3) << __time->get_tti() << "] - ";
 	s_logger_link << "link[" << left << setw(3) << t_source_node_id << ", ";
 	s_logger_link << left << setw(3) << t_relay_node_id << "] - ";
 	s_logger_link << "{" << t_description << "}";
@@ -234,11 +237,6 @@ void route_udp::log_link(int t_source_node_id, int t_relay_node_id, std::string 
 		else s_logger_link << lost_reason2;
 		s_logger_link << endl;
 	}
-}
-
-
-route_udp::route_udp() {
-
 }
 
 void route_udp::initialize() {
@@ -301,7 +299,7 @@ void route_udp::update_adjacent_list() {
 		route_udp_node& source_node = get_node_array()[source_node_id];
 
 		context* __context = context::get_context();
-		int current_tti = (*(int*)context::get_context()->get_non_bean(TTI));
+		int current_tti = get_time()->get_tti();
 		int interval = 1.5*((route_config*)__context->get_bean("route_config"))->get_t_interval();
 		vector<pair<int, adjacent_message>>::iterator it= source_node.m_adjacent_list.begin();
 		while (it != source_node.m_adjacent_list.end()) {
@@ -331,7 +329,7 @@ void route_udp::event_trigger() {
 		route_udp_node& source_node = get_node_array()[origin_source_node_id];
 
 		//判断是否到该发送hello包的时间
-		if (source_node.m_tti_next_hello == (*(int*)context::get_context()->get_non_bean(TTI))) {
+		if (source_node.m_tti_next_hello == get_time()->get_tti()) {
 			get_node_array()[origin_source_node_id].offer_send_event_queue(
 				new route_udp_route_event(origin_source_node_id, -1, HEllO)
 			);
@@ -342,7 +340,7 @@ void route_udp::event_trigger() {
 	}
 
 	//在初始化时间过后，触发数据传输事件
-	if((*(int*)context::get_context()->get_non_bean(TTI))>interval){
+	if(get_time()->get_tti()>interval){
 		for (int origin_source_node_id = 0; origin_source_node_id < route_udp_node::s_node_count; origin_source_node_id++) {
 			if (u_rate(s_engine) < trigger_rate) {
 
@@ -442,7 +440,6 @@ void route_udp::start_sending_data() {
 }
 
 void route_udp::transmit_data() {
-
 	//对所有link_event进行第一遍遍历。目的1：传输所有事件。目的2：维护接收节点传输pattern的状态
 	for (int source_node_id = 0; source_node_id < route_udp_node::s_node_count; source_node_id++) {
 		route_udp_node& source_node = get_node_array()[source_node_id];
@@ -624,7 +621,7 @@ void route_udp::transmit_data() {
 						context* __context = context::get_context();
 						adjacent_message temp;
 						temp.pattern_id = pattern_idx;
-						temp.life_time = (*(int*)context::get_context()->get_non_bean(TTI));
+						temp.life_time = get_time()->get_tti();
 						temp.infer_node_id = route_udp_node::s_node_id_per_pattern[pattern_idx];
 						temp.sinr = (*it)->sinr_per_tti;
 						temp.receive_node_x = get_gtt()->get_vue_array()[destination_node.get_id()].get_physics_level()->m_absx;

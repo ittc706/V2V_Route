@@ -3,24 +3,15 @@
 #include"enumeration.h"
 #include"reflect/object.h"
 
-class gtt_config;
 class vue;
+class v2x_time;
 
 class gtt:public object {
-
-	/*--------------------静态--------------------*/
 public:
 	/*
-	* 根据gtt模式来生成gtt组件对象
+	* 获取时间对象
 	*/
-	static gtt* gtt_bind_by_mode(gtt_mode t_mode);
-
-	/*--------------------接口--------------------*/
-public:
-	/*
-	* 设置配置文件,不同的实现需要不同的配置文件，因此设为虚函数
-	*/
-	virtual void set_config(object* t_config) = 0;
+	virtual v2x_time* get_time() = 0;
 
 	/*
 	* 获取车辆数组指针

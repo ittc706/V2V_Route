@@ -1,5 +1,29 @@
 #pragma once
 
+/*----------------------------------------------------------------------------
+* >>>>>>>>>>>>>>>>>>>>>>>>删除拷贝控制成员宏(START)<<<<<<<<<<<<<<<<<<<<<<<<<<<
+* ---------------------------------------------------------------------------*/
+/*
+* 将拷贝构造函数、移动构造函数、拷贝赋值运算符、移动赋值运算符定义为删除
+*/
+#define DELETE_COPY_MEMBER(class_type) \
+public:\
+class_type(){}\
+class_type(const class_type&) = delete;\
+class_type(class_type&&) = delete;\
+class_type& operator=(const class_type&) = delete;\
+class_type& operator=(class_type&&) = delete;\
+
+
+/*----------------------------------------------------------------------------
+* >>>>>>>>>>>>>>>>>>>>>>>>>删除拷贝控制成员宏(END)<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+* ---------------------------------------------------------------------------*/
+
+
+/*----------------------------------------------------------------------------
+* >>>>>>>>>>>>>>>>>>>>>>>>>>>>bean类注册宏(START)<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+* ---------------------------------------------------------------------------*/
+
 /*
 * 友元声明
 */
@@ -19,7 +43,6 @@ friend void invoke(const object* obj, const std::string& method_name, void* para
 friend void invoke(const object* obj, const std::string& method_name, const std::string& param1); \
 \
 friend void invoke(const object* obj, const std::string& method_name, object* param1); \
-
 
 
 /*
@@ -63,6 +86,7 @@ private:
 * 该宏组合了上面几个宏，用于被反射的类进行注册
 */
 #define REGISTE_MEMBER_HEAD(class_type)\
+DELETE_COPY_MEMBER(class_type) \
 INVOKE_FRIEND_DECLARED \
 REGISTE_CLASS_ID_HEAD(class_type) \
 REGISTE_FACTORY_METHOD(class_type) \
@@ -75,8 +99,15 @@ OVERRIDE_OPERATOR_DELETE(class_type) \
 #define REGISTE_CLASS_ID_RESOURCE(class_type)\
 const long class_type::class_id = ++object::class_id;
 
+/*----------------------------------------------------------------------------
+* >>>>>>>>>>>>>>>>>>>>>>>>>>>>bean类注册宏(END)<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+* ---------------------------------------------------------------------------*/
 
-/*--------------------------------------------------------------------------*/
+
+
+/*----------------------------------------------------------------------------
+* >>>>>>>>>>>>>>>>>>>>>>>>>>反射方法注册宏(START)<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+* ---------------------------------------------------------------------------*/
 //注意，以下几个宏中几个固定字符:class_name,obj,method_name,param1
 #define FACTORY_INVOKE_START \
 if(class_name==""){\
@@ -128,5 +159,10 @@ if(class_id==class_type::class_id){\
 	else if(method_name == #method){\
 		__##class_type -> method(param1);\
 	}
+
+
+/*----------------------------------------------------------------------------
+* >>>>>>>>>>>>>>>>>>>>>>>>>>>反射方法注册宏(END)<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+* ---------------------------------------------------------------------------*/
 
 

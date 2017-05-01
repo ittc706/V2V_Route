@@ -28,14 +28,9 @@
 #include"imta.h"
 #include"function.h"
 #include"reflect/context.h"
-#include"non_bean_id.h"
+#include"time_stamp.h"
 
 using namespace std;
-
-
-void gtt_urban::set_config(object* t_config) {
-	m_config = (gtt_urban_config*)t_config;
-}
 
 void gtt_urban::initialize() {
 	gtt_urban_config* __config = get_config();
@@ -129,7 +124,7 @@ int gtt_urban::get_vue_num() {
 
 void gtt_urban::fresh_location() {
 	//<Warn>:将信道刷新时间和位置刷新时间分开
-	if ((*(int*)context::get_context()->get_non_bean(TTI)) % get_config()->get_freshtime() != 0) {
+	if (get_time()->get_tti() % get_config()->get_freshtime() != 0) {
 		return;
 	}
 

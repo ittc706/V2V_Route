@@ -26,7 +26,6 @@
 #include"route_tcp.h"
 #include"route_udp.h"
 #include"reflect/context.h"
-#include"non_bean_id.h"
 
 using namespace std;
 

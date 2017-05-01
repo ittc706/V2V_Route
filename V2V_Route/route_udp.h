@@ -388,6 +388,9 @@ public:
 	std::pair<int, int> select_relay_information();
 };
 
+class v2x_time;
+class gtt;
+
 class route_udp :public route {
 	REGISTE_MEMBER_HEAD(route_udp)
 
@@ -475,17 +478,19 @@ public:
 	const std::vector<route_udp_route_event*>& get_failed_route_event_vec() {
 		return m_failed_route_event_vec;
 	}
-public:
-	/*
-	* ¹¹Ôìº¯Êý
-	*/
-	route_udp();
 
 private:
+	v2x_time* m_time;
 	gtt* m_gtt;
-public:
-	void set_gtt(object* t_gtt)override {
+	void set_time(object* t_time) {
+		m_time = (v2x_time*)t_time;
+	}
+	void set_gtt(object* t_gtt) {
 		m_gtt = (gtt*)t_gtt;
+	}
+public:
+	v2x_time* get_time()override {
+		return m_time;
 	}
 
 	gtt* get_gtt() override {

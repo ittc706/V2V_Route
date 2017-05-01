@@ -10,7 +10,7 @@
 #include"vue_physics.h"
 #include"function.h"
 #include"reflect/context.h"
-#include"non_bean_id.h"
+#include"time_stamp.h"
 
 using namespace std;
 
@@ -122,7 +122,8 @@ void route_tcp::log_node_pattern(int t_source_node_id,
 	route_tcp_pattern_state t_from_pattern_state,
 	route_tcp_pattern_state t_to_pattern_state,
 	string t_description) {
-	s_logger_pattern << "TTI[" << left << setw(3) << (*(int*)context::get_context()->get_non_bean(TTI)) << "] - ";
+	v2x_time* __time = (v2x_time*)context::get_context()->get_bean("time");
+	s_logger_pattern << "TTI[" << left << setw(3) << __time->get_tti() << "] - ";
 	s_logger_pattern << "link[" << left << setw(3) << t_source_node_id << ", ";
 	s_logger_pattern << left << setw(3) << t_relay_node_id << "] - ";
 	s_logger_pattern << "node[" << left << setw(3) << t_cur_node_id << "] - ";
@@ -149,23 +150,21 @@ string route_tcp::pattern_state_to_string(route_tcp_pattern_state t_pattern_stat
 }
 
 void route_tcp::log_event(int t_origin_node_id, int t_fianl_destination_node_id) {
-	s_logger_event << "TTI[" << left << setw(3) << (*(int*)context::get_context()->get_non_bean(TTI)) << "] - ";
+	v2x_time* __time = (v2x_time*)context::get_context()->get_bean("time");
+	s_logger_event << "TTI[" << left << setw(3) << __time->get_tti() << "] - ";
 	s_logger_event << "trigger[" << left << setw(3) << t_origin_node_id << ", ";
 	s_logger_event << left << setw(3) << t_fianl_destination_node_id << "]" << endl;
 
 }
 
 void route_tcp::log_link(int t_source_node_id, int t_relay_node_id, std::string t_description) {
-	s_logger_link << "TTI[" << left << setw(3) << (*(int*)context::get_context()->get_non_bean(TTI)) << "] - ";
+	v2x_time* __time = (v2x_time*)context::get_context()->get_bean("time");
+	s_logger_link << "TTI[" << left << setw(3) << __time->get_tti() << "] - ";
 	s_logger_link << "link[" << left << setw(3) << t_source_node_id << ", ";
 	s_logger_link << left << setw(3) << t_relay_node_id << "] - ";
 	s_logger_link << "{" << t_description << "}" << endl;
 }
 
-
-route_tcp::route_tcp() {
-
-}
 
 void route_tcp::initialize() {
 	context* __context = context::get_context();

@@ -93,7 +93,12 @@ void bean_loader::order_by_dependency(std::vector<bean_definition*>& definitions
 	map<string, int> degree_map;
 	for (bean_definition* definition : definitions) {
 		string bean_id = definition->id;
-		assert(bean_map.insert({ bean_id,definition }).second);
+		if (bean_map.find(bean_id) != bean_map.end()) {
+			cout << "bean id <" << bean_id << ">重复，请保证配置文件中所有bean id的唯一性" << endl;
+			system("pause");
+			exit(0);
+		}
+		bean_map.insert({ bean_id,definition });
 		for (bean_dependency dependency : definition->dependencies) {
 			string dependency_bean_id = dependency.ref_id;
 			if (adj_map.find(dependency_bean_id) == adj_map.end()) {

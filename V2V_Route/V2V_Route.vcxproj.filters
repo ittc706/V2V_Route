@@ -78,9 +78,6 @@
     <ClInclude Include="reflect\bean_loader.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="non_bean_id.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="reflect\invoke.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -89,9 +86,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="gtt.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="gtt_highspeed.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -120,9 +114,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="route_tcp.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="route.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="route_udp.cpp">

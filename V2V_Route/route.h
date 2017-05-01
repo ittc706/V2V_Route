@@ -1,6 +1,6 @@
 #pragma once
 #include"enumeration.h"
-#include"gtt.h"
+#include"reflect/object.h"
 
 enum route_transimit_state {
 	SUCCESS,
@@ -12,17 +12,20 @@ struct event_trigger_dto {
 	int destination_vue_id;
 };
 
+class gtt;
+class v2x_time;
+
 class route:public object {
-
-	/*--------------------静态--------------------*/
-	/*
-	* 根据gtt模式来生成gtt组件对象
-	*/
-	static route* route_bind_by_mode(route_mode t_mode);
-
 public:
-	virtual void set_gtt(object* t_gtt) = 0;
-	
+	/*
+	* 获取时间对象
+	*/
+	virtual v2x_time* get_time() = 0;
+
+	/*
+	* 获取gtt控制器
+	*/
+
 	virtual gtt* get_gtt() = 0;
 	/*
 	* 初始化

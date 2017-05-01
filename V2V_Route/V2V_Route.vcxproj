@@ -121,7 +121,6 @@
     <ClInclude Include="gtt_highspeed.h" />
     <ClInclude Include="gtt_urban.h" />
     <ClInclude Include="imta.h" />
-    <ClInclude Include="non_bean_id.h" />
     <ClInclude Include="reflect\bean_definition.h" />
     <ClInclude Include="reflect\bean_loader.h" />
     <ClInclude Include="reflect\context.h" />
@@ -139,7 +138,6 @@
     <ClInclude Include="wt.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="gtt.cpp" />
     <ClCompile Include="gtt_highspeed.cpp" />
     <ClCompile Include="gtt_urban.cpp" />
     <ClCompile Include="imta.cpp" />
@@ -149,7 +147,6 @@
     <ClCompile Include="reflect\context.cpp" />
     <ClCompile Include="reflect\invoke.cpp" />
     <ClCompile Include="reflect\object.cpp" />
-    <ClCompile Include="route.cpp" />
     <ClCompile Include="route_tcp.cpp" />
     <ClCompile Include="route_udp.cpp" />
     <ClCompile Include="system_control.cpp" />

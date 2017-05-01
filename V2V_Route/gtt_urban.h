@@ -3,18 +3,28 @@
 #include"gtt.h"
 
 class gtt_urban_config;
+class v2x_time;
 
 class gtt_urban :public gtt {
 	REGISTE_MEMBER_HEAD(gtt_urban)
 private:
 	gtt_urban_config* m_config;
 	vue* m_vue_array;
-	/*--------------------接口--------------------*/
+	v2x_time* m_time;
+	void set_config(object* t_config) {
+		m_config = (gtt_urban_config*)t_config;
+	}
+	void set_time(object* t_time) {
+		m_time = (v2x_time*)t_time;
+	}
 public:
-	void set_config(object* t_config) override;
-
 	gtt_urban_config* get_config() {
 		return m_config;
+	}
+	/*--------------------接口--------------------*/
+public:
+	v2x_time* get_time()override {
+		return m_time;
 	}
 
 	vue* get_vue_array()override {
