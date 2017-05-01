@@ -5,7 +5,6 @@
 #include"object.h"
 #include"bean_loader.h"
 #include"bean_definition.h"
-#include"../enumeration.h"
 
 /*
 * ÈÝÆ÷Àà
@@ -38,7 +37,7 @@ private:
 	context(const std::string& path);
 public:
 	~context();
-	static void create_context(platform t_platform);
+	static void create_context(const std::string& path);
 	static context* get_context();
 
 private:

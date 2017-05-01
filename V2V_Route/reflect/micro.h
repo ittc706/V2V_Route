@@ -1,4 +1,5 @@
 #pragma once
+#include<iostream>
 
 /*----------------------------------------------------------------------------
 * >>>>>>>>>>>>>>>>>>>>>>>>删除拷贝控制成员宏(START)<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -132,7 +133,9 @@ else {\
 if(class_id==class_type::class_id){\
 	class_type * __##class_type = (class_type*)obj;\
 	if (method_name == "") {\
-		throw std::logic_error("反射调用函数失败"); \
+		std::cout<<"反射方法名不能为空"<<std::endl;\
+		system("pause");\
+		exit(0);\
 	}
 
 /*
@@ -140,7 +143,9 @@ if(class_id==class_type::class_id){\
 */
 #define METHOD_INVOKE_CLASS_END(class_type)\
 	else {\
-		throw std::logic_error("反射调用函数失败");\
+		std::cout<<"方法<"<<#class_type<<"."<<method_name<<">尚未注册"<<std::endl;\
+        system("pause");\
+		exit(0);\
 	}\
 }
 

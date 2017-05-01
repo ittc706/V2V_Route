@@ -11,6 +11,7 @@ object* new_instance(const std::string& class_name);
 * 零元函数反射注册
 */
 void invoke(const object* obj, const std::string& method_name);
+
 /*
 * 函数反射注册
 * 参数类型：int

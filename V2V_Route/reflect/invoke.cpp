@@ -61,11 +61,7 @@ object* new_instance(const std::string& class_name) {
 */
 void invoke(const object* obj, const std::string& method_name) {
 	long class_id = obj->get_class_id();
-	METHOD_INVOKE_CLASS_START(rrm_config)
-		METHOD_INVOKE_ZERO_PARAM(rrm_config, set_pattern_num)
-		METHOD_INVOKE_CLASS_END(rrm_config)
-
-		METHOD_INVOKE_CLASS_START(gtt_urban)
+	METHOD_INVOKE_CLASS_START(gtt_urban)
 		METHOD_INVOKE_ZERO_PARAM(gtt_urban, initialize)
 		METHOD_INVOKE_CLASS_END(gtt_urban)
 
@@ -80,6 +76,14 @@ void invoke(const object* obj, const std::string& method_name) {
 		METHOD_INVOKE_CLASS_START(wt)
 		METHOD_INVOKE_ZERO_PARAM(wt, set_resource)
 		METHOD_INVOKE_CLASS_END(wt)
+
+		METHOD_INVOKE_CLASS_START(global_control_config)
+		METHOD_INVOKE_ZERO_PARAM(global_control_config, set_platform)
+		METHOD_INVOKE_CLASS_END(global_control_config)
+
+		METHOD_INVOKE_CLASS_START(rrm_config)
+		METHOD_INVOKE_ZERO_PARAM(rrm_config, set_pattern_num)
+		METHOD_INVOKE_CLASS_END(rrm_config)
 }
 
 /*
@@ -141,7 +145,6 @@ void invoke(const object* obj, const std::string& method_name, const std::string
 
 		METHOD_INVOKE_CLASS_START(global_control_config)
 		METHOD_INVOKE_ONE_PARAM(global_control_config, set_ntti)
-		METHOD_INVOKE_ONE_PARAM(global_control_config, set_platform)
 		METHOD_INVOKE_CLASS_END(global_control_config)
 
 
@@ -191,24 +194,38 @@ void invoke(const object* obj, const std::string& method_name, object* param1) {
 		METHOD_INVOKE_ONE_PARAM(system_control, set_global_control_config)
 		METHOD_INVOKE_CLASS_END(system_control)
 
-	
+
 		METHOD_INVOKE_CLASS_START(gtt_urban)
 		METHOD_INVOKE_ONE_PARAM(gtt_urban, set_config)
 		METHOD_INVOKE_ONE_PARAM(gtt_urban, set_time)
+		METHOD_INVOKE_ONE_PARAM(gtt_urban, set_global_control_config)
+		METHOD_INVOKE_ONE_PARAM(gtt_urban, set_rrm_config)
 		METHOD_INVOKE_CLASS_END(gtt_urban)
 
 		METHOD_INVOKE_CLASS_START(gtt_highspeed)
 		METHOD_INVOKE_ONE_PARAM(gtt_highspeed, set_config)
 		METHOD_INVOKE_ONE_PARAM(gtt_highspeed, set_time)
+		METHOD_INVOKE_ONE_PARAM(gtt_highspeed, set_global_control_config)
+		METHOD_INVOKE_ONE_PARAM(gtt_highspeed, set_rrm_config)
 		METHOD_INVOKE_CLASS_END(gtt_highspeed)
 
 		METHOD_INVOKE_CLASS_START(route_tcp)
 		METHOD_INVOKE_ONE_PARAM(route_tcp, set_gtt)
+		METHOD_INVOKE_ONE_PARAM(route_tcp, set_wt)
 		METHOD_INVOKE_ONE_PARAM(route_tcp, set_time)
+		METHOD_INVOKE_ONE_PARAM(route_tcp, set_global_control_config)
+		METHOD_INVOKE_ONE_PARAM(route_tcp, set_rrm_config)
+		METHOD_INVOKE_ONE_PARAM(route_tcp, set_tmc_config)
+		METHOD_INVOKE_ONE_PARAM(route_tcp, set_route_config)
 		METHOD_INVOKE_CLASS_END(route_tcp)
 
 		METHOD_INVOKE_CLASS_START(route_udp)
 		METHOD_INVOKE_ONE_PARAM(route_udp, set_gtt)
+		METHOD_INVOKE_ONE_PARAM(route_udp, set_wt)
 		METHOD_INVOKE_ONE_PARAM(route_udp, set_time)
+		METHOD_INVOKE_ONE_PARAM(route_udp, set_global_control_config)
+		METHOD_INVOKE_ONE_PARAM(route_udp, set_rrm_config)
+		METHOD_INVOKE_ONE_PARAM(route_udp, set_tmc_config)
+		METHOD_INVOKE_ONE_PARAM(route_udp, set_route_config)
 		METHOD_INVOKE_CLASS_END(route_udp)
 }

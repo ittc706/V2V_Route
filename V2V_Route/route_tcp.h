@@ -350,6 +350,11 @@ public:
 
 class v2x_time;
 class gtt;
+class wt;
+class global_control_config;
+class rrm_config;
+class tmc_config;
+class route_config;
 
 class route_tcp :public route {
 	REGISTE_MEMBER_HEAD(route_tcp)
@@ -416,14 +421,35 @@ public:
 private:
 	v2x_time* m_time;
 	gtt* m_gtt;
+	wt* m_wt;
+	global_control_config* m_global_control_config;
+	rrm_config* m_rrm_config;
+	tmc_config* m_tmc_config;
+	route_config* m_route_config;
+
 	void set_time(object* t_time) {
 		m_time = (v2x_time*)t_time;
 	}
 	void set_gtt(object* t_gtt) {
 		m_gtt = (gtt*)t_gtt;
 	}
+	void set_wt(object* t_wt) {
+		m_wt = (wt*)t_wt;
+	}
+	void set_global_control_config(object* t_global_control_config) {
+		m_global_control_config = (global_control_config*)t_global_control_config;
+	}
+	void set_rrm_config(object* t_rrm_config) {
+		m_rrm_config = (rrm_config*)t_rrm_config;
+	}
+	void set_tmc_config(object* t_tmc_config) {
+		m_tmc_config = (tmc_config*)t_tmc_config;
+	}
+	void set_route_config(object* t_route_config) {
+		m_route_config = (route_config*)t_route_config;
+	}
 public:
-	v2x_time* get_time()override {
+	v2x_time* get_time() override {
 		return m_time;
 	}
 
@@ -431,20 +457,31 @@ public:
 		return m_gtt;
 	}
 
-	/*
-	* 初始化
-	*/
-	void initialize()override;
+	wt* get_wt() override {
+		return m_wt;
+	}
 
-	/*
-	* 对整个网络层进行状态更新，对外暴露的接口，每个TTI调用一次即可
-	*/
-	void process_per_tti()override;
+	global_control_config* get_global_control_config() override {
+		return m_global_control_config;
+	}
 
-	/*
-	* 随车辆运动而更新邻接列表，车辆刷新时调用即可
-	*/
-	void update_route_table_from_physics_level()override;
+	rrm_config* get_rrm_config() override {
+		return m_rrm_config;
+	}
+
+	tmc_config* get_tmc_config() override {
+		return m_tmc_config;
+	}
+
+	route_config* get_route_config() override {
+		return m_route_config;
+	}
+
+	void initialize() override;
+
+	void process_per_tti() override;
+
+	void update_route_table_from_physics_level() override;
 
 private:
 	/*

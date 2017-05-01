@@ -42,16 +42,24 @@ int main() {
 	cout << obj4->get_class_id() << endl;*/
 
 
-	platform _platform;
-	ifstream in("config\\beans.xml");
-	if (in.is_open()) {
-		_platform = Windows;
+	string path1 = "config/beans.xml";
+	string path2 = "config\\beans.xml";
+	ifstream in1(path1);
+	ifstream in2(path2);
+	string path;
+	if (in1.is_open()) {
+		path = path1;
+	}
+	else if (in2.is_open()) {
+		path = path2;
 	}
 	else {
-		_platform = Linux;
+		cout << "配置文件路径有误，默认为:config->beans.xml" << endl;
+		system("pause");
+		exit(0);
 	}
 
-	context::create_context(_platform);
+	context::create_context(path);
 	context *__context = context::get_context();
 
 	system_control *__system = (system_control *)__context->get_bean("system_control");

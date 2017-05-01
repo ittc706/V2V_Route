@@ -1,8 +1,7 @@
 #include"context.h"
 #include"invoke.h"
 #include<iostream>
-#include"../gtt.h"
-#include"../enumeration.h"
+
 using namespace std;
 
 context* context::singleton = nullptr;
@@ -15,12 +14,7 @@ context::~context() {
 	delete loader;
 }
 
-void context::create_context(platform t_platform) {
-	string path;
-	if (t_platform == Windows)
-		path = "config\\beans.xml";
-	else
-		path = "config/beans.xml";
+void context::create_context(const std::string& path) {
 	static context _context = context(path);
 	singleton = &_context;
 	singleton->init();

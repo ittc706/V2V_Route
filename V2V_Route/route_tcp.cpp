@@ -55,21 +55,22 @@ const std::set<int>& route_tcp_node::get_node_id_set(int t_pattern_idx) {
 }
 
 route_tcp_node::route_tcp_node() {
+	rrm_config* __rrm_config = (rrm_config*)context::get_context()->get_bean("rrm_config");
 	m_pattern_state = vector<pair<route_tcp_pattern_state, route_tcp_link_event*>>(
-		((rrm_config*)context::get_context()->get_bean("rrm_config"))->get_pattern_num(),
+		__rrm_config->get_pattern_num(),
 		pair<route_tcp_pattern_state, route_tcp_link_event*>(IDLE, nullptr)
 		);
 
 	m_select_cache = pair<int, int>(-1, -1);
 	m_last_round_request_per_pattern = vector<vector<int>>(
-		((rrm_config*)context::get_context()->get_bean("rrm_config"))->get_pattern_num()
+		__rrm_config->get_pattern_num()
 		);
 	m_syn_request_per_pattern = vector<vector<int>>(
-		((rrm_config*)context::get_context()->get_bean("rrm_config"))->get_pattern_num()
+		__rrm_config->get_pattern_num()
 		);
 
 	m_next_round_link_event = vector<route_tcp_link_event*>(
-		((rrm_config*)context::get_context()->get_bean("rrm_config"))->get_pattern_num(),
+		__rrm_config->get_pattern_num(),
 		nullptr
 		);
 }
@@ -172,7 +173,7 @@ void route_tcp::initialize() {
 	int vue_num = get_gtt()->get_vue_num();
 	m_node_array = new route_tcp_node[vue_num];
 
-	if (((global_control_config*)__context->get_bean("global_control_config"))->get_platform() == Windows) {
+	if (get_global_control_config()->get_platform() == Windows) {
 		s_logger_pattern.open("log\\route_tcp_pattern_log.txt");
 		s_logger_link.open("log\\route_tcp_link_log.txt");
 		s_logger_event.open("log\\route_tcp_event_log.txt");
@@ -183,7 +184,7 @@ void route_tcp::initialize() {
 		s_logger_event.open("log/route_tcp_event_log.txt");
 	}
 
-	route_tcp_node::s_node_id_per_pattern = vector<set<int>>(((rrm_config*)context::get_context()->get_bean("rrm_config"))->get_pattern_num());
+	route_tcp_node::s_node_id_per_pattern = vector<set<int>>(get_rrm_config()->get_pattern_num());
 }
 
 void route_tcp::process_per_tti() {
@@ -211,7 +212,7 @@ void route_tcp::update_route_table_from_physics_level() {
 
 	//<Warn>:暂时改为根据距离确定邻接表
 	context* __context = context::get_context();
-	int vue_num = ((gtt*)__context->get_bean("gtt"))->get_vue_num();
+	int vue_num = get_gtt()->get_vue_num();
 	for (int vue_id_i = 0; vue_id_i < vue_num; vue_id_i++) {
 		for (int vue_id_j = 0; vue_id_j < vue_num; vue_id_j++) {
 			if (vue_id_i == vue_id_j)continue;
@@ -225,7 +226,7 @@ void route_tcp::update_route_table_from_physics_level() {
 
 void route_tcp::event_trigger() {
 	context* __context = context::get_context();
-	double trigger_rate = ((tmc_config*)__context->get_bean("tmc_config"))->get_trigger_rate();
+	double trigger_rate = get_tmc_config()->get_trigger_rate();
 
 	uniform_real_distribution<double> u_rate(0, 1);
 	uniform_int_distribution<int> u_node_id(0, route_tcp_node::s_node_count - 1);
@@ -251,7 +252,7 @@ void route_tcp::update_tobe() {
 	//将TO_BE_SEND/RECEIVE转换为SENDING/RECEIVING，同时将link_event从m_next_round_link_event转移到m_pattern_state中
 	for (int relay_node_id = 0; relay_node_id < route_tcp_node::s_node_count; relay_node_id++) {
 		route_tcp_node& relay_node = get_node_array()[relay_node_id];
-		for (int pattern_idx = 0; pattern_idx < ((rrm_config*)context::get_context()->get_bean("rrm_config"))->get_pattern_num(); pattern_idx++) {
+		for (int pattern_idx = 0; pattern_idx < get_rrm_config()->get_pattern_num(); pattern_idx++) {
 			if (relay_node.m_next_round_link_event[pattern_idx] != nullptr) {
 
 				route_tcp_pattern_state temp_relay_state = relay_node.m_pattern_state[pattern_idx].first;
@@ -352,7 +353,7 @@ void route_tcp::send_syn() {
 void route_tcp::send_ack() {
 	for (int relay_node_id = 0; relay_node_id < route_tcp_node::s_node_count; relay_node_id++) {
 		route_tcp_node& relay_node = get_node_array()[relay_node_id];
-		for (int pattern_idx = 0; pattern_idx < ((rrm_config*)context::get_context()->get_bean("rrm_config"))->get_pattern_num(); pattern_idx++) {
+		for (int pattern_idx = 0; pattern_idx < get_rrm_config()->get_pattern_num(); pattern_idx++) {
 			//该pattern下，没有syn请求，跳过即可
 			if (relay_node.m_last_round_request_per_pattern[pattern_idx].size() == 0) continue;
 
@@ -445,7 +446,7 @@ void route_tcp::send_ack() {
 void route_tcp::receive_data() {
 	for (int relay_node_id = 0; relay_node_id < route_tcp_node::s_node_count; relay_node_id++) {
 		route_tcp_node& relay_node = get_node_array()[relay_node_id];
-		for (int pattern_idx = 0; pattern_idx < ((rrm_config*)context::get_context()->get_bean("rrm_config"))->get_pattern_num(); pattern_idx++) {
+		for (int pattern_idx = 0; pattern_idx < get_rrm_config()->get_pattern_num(); pattern_idx++) {
 			if (relay_node.m_pattern_state[pattern_idx].first == RECEIVING) {
 				route_tcp_link_event* link_event = relay_node.m_pattern_state[pattern_idx].second;
 

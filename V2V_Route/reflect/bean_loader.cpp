@@ -18,6 +18,11 @@ vector<bean_definition*> bean_loader::load() {
 
 	//读取待解析字符串
 	ifstream in(configuration_path);
+	if (!in.is_open()) {
+		cout << "配置文件路径有误：" << configuration_path << endl;
+		system("pause");
+		exit(0);
+	}
 	istreambuf_iterator<char> if_it(in), if_eof;
 	string content(if_it, if_eof);
 	in.close();

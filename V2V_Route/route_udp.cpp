@@ -241,10 +241,10 @@ void route_udp::log_link(int t_source_node_id, int t_relay_node_id, std::string 
 
 void route_udp::initialize() {
 	context* __context = context::get_context();
-	int vue_num = ((gtt*)__context->get_bean("gtt"))->get_vue_num();
+	int vue_num = get_gtt()->get_vue_num();
 	m_node_array = new route_udp_node[vue_num];
 
-	if (((global_control_config*)__context->get_bean("global_control_config"))->get_platform() == Windows) {
+	if (get_global_control_config()->get_platform() == Windows) {
 		s_logger_pattern.open("log\\route_udp_pattern_log.txt");
 		s_logger_link.open("log\\route_udp_link_log.txt");
 		s_logger_event.open("log\\route_udp_event_log.txt");
@@ -255,7 +255,7 @@ void route_udp::initialize() {
 		s_logger_event.open("log/route_udp_event_log.txt");
 	}
 
-	route_udp_node::s_node_id_per_pattern = vector<set<int>>(((rrm_config*)context::get_context()->get_bean("rrm_config"))->get_pattern_num());
+	route_udp_node::s_node_id_per_pattern = vector<set<int>>(get_rrm_config()->get_pattern_num());
 }
 
 void route_udp::process_per_tti() {
@@ -281,7 +281,7 @@ void route_udp::update_route_table_from_physics_level() {
 
 	//<Warn>:暂时改为根据距离确定邻接表
 	context* __context = context::get_context();
-	int vue_num = ((gtt*)__context->get_bean("gtt"))->get_vue_num();
+	int vue_num = get_gtt()->get_vue_num();
 	for (int vue_id_i = 0; vue_id_i < vue_num; vue_id_i++) {
 		for (int vue_id_j = 0; vue_id_j < vue_num; vue_id_j++) {
 			if (vue_id_i == vue_id_j)continue;
@@ -300,7 +300,7 @@ void route_udp::update_adjacent_list() {
 
 		context* __context = context::get_context();
 		int current_tti = get_time()->get_tti();
-		int interval = 1.5*((route_config*)__context->get_bean("route_config"))->get_t_interval();
+		int interval = 1.5*get_route_config()->get_t_interval();
 		vector<pair<int, adjacent_message>>::iterator it= source_node.m_adjacent_list.begin();
 		while (it != source_node.m_adjacent_list.end()) {
 			if ((current_tti - it->second.life_time) > interval) {
@@ -315,13 +315,13 @@ void route_udp::update_adjacent_list() {
 
 void route_udp::event_trigger() {
 	context* __context = context::get_context();
-	double trigger_rate = ((tmc_config*)__context->get_bean("tmc_config"))->get_trigger_rate();
+	double trigger_rate = get_tmc_config()->get_trigger_rate();
 
 	uniform_real_distribution<double> u_rate(0, 1);
 	uniform_int_distribution<int> u_node_id(0, route_udp_node::s_node_count - 1);
 
 	//通过配置文件来控制hello包的传输平均间隔
-	int interval = ((route_config*)__context->get_bean("route_config"))->get_t_interval();
+	int interval = get_route_config()->get_t_interval();
 	uniform_int_distribution<int> u_tti_hello_between(0.5*interval, 1.5*interval);
 
 	//触发Hello包

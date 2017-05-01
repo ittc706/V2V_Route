@@ -62,7 +62,7 @@ void gtt_urban::initialize() {
 
 	ofstream vue_coordinate;
 
-	if (((global_control_config*)context::get_context()->get_bean("global_control_config"))->get_platform() == Windows) {
+	if (get_global_control_config()->get_platform() == Windows) {
 		vue_coordinate.open("log\\vue_coordinate.txt");
 	}
 	else {
@@ -106,7 +106,7 @@ void gtt_urban::initialize() {
 			vue_coordinate << endl;
 
 			//初始化pattern占用情况的数组全为false，即未被占用状态
-			p->m_pattern_occupied = new bool[((rrm_config*)context::get_context()->get_bean("rrm_config"))->get_pattern_num()];
+			p->m_pattern_occupied = new bool[get_rrm_config()->get_pattern_num()];
 			memset(p->m_pattern_occupied, false, sizeof(p->m_pattern_occupied));
 		}
 	}

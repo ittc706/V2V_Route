@@ -5,6 +5,8 @@
 
 class vue;
 class v2x_time;
+class global_control_config;
+class rrm_config;
 
 class gtt:public object {
 public:
@@ -17,6 +19,16 @@ public:
 	* 获取车辆数组指针
 	*/
 	virtual vue* get_vue_array() = 0;
+
+	/*
+	* 获取全局配置对象
+	*/
+	virtual global_control_config* get_global_control_config() = 0;
+
+	/*
+	* 获取无线资源管理配置对象
+	*/
+	virtual rrm_config* get_rrm_config() = 0;
 
 	/*
 	* 做一些初始化工作

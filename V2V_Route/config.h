@@ -2,6 +2,7 @@
 #include<vector>
 #include<string>
 #include<stdexcept>
+#include<fstream>
 #include"reflect/object.h"
 #include"enumeration.h"
 
@@ -14,15 +15,14 @@ class global_control_config :public object {
 		*/
 private:
 	platform m_platform;
-	void set_platform(std::string t_platform) {
-		if (t_platform == "Windows") {
-			m_platform = Windows;
-		}
-		else if (t_platform == "Linux") {
+	void set_platform() {
+		std::ifstream in1("config/beans.xml");
+		std::ifstream in2("config\\beans.xml");
+		if (in1.is_open()) {
 			m_platform = Linux;
 		}
-		else {
-			throw std::logic_error("error");
+		else if (in2.is_open()) {
+			m_platform = Windows;
 		}
 	}
 public:

@@ -1,6 +1,6 @@
 <bean id="global_control_config", class="global_control_config">
-	<property name="platform", value="Windows"/>
 	<property name="ntti", value="10"/>
+	<pre-processor method_name="set_platform"/>
 </bean>
 
 <bean id="gtt_highspeed_config", class="gtt_highspeed_config">
@@ -66,12 +66,19 @@
 <bean id="gtt", class="gtt_urban">	
 	<dependency name="config", ref-id="gtt_urban_config"/>
 	<dependency name="time", ref-id="time"/>
+	<dependency name="global_control_config", ref-id="global_control_config"/>
+	<dependency name="rrm_config", ref-id="rrm_config"/>
 	<post-processor method_name="initialize"/>
 </bean>
 
 <bean id="route", class="route_tcp">	
-	<dependency name="gtt", ref-id="gtt"/>
 	<dependency name="time", ref-id="time"/>
+	<dependency name="gtt", ref-id="gtt"/>
+	<dependency name="wt", ref-id="wt"/>
+	<dependency name="global_control_config", ref-id="global_control_config"/>
+	<dependency name="rrm_config", ref-id="rrm_config"/>
+	<dependency name="tmc_config", ref-id="tmc_config"/>
+	<dependency name="route_config", ref-id="route_config"/>
 	<post-processor method_name="initialize"/>
 </bean>
 

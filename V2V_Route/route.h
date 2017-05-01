@@ -12,8 +12,13 @@ struct event_trigger_dto {
 	int destination_vue_id;
 };
 
-class gtt;
 class v2x_time;
+class gtt;
+class wt;
+class global_control_config;
+class rrm_config;
+class tmc_config;
+class route_config;
 
 class route:public object {
 public:
@@ -25,8 +30,33 @@ public:
 	/*
 	* 获取gtt控制器
 	*/
-
 	virtual gtt* get_gtt() = 0;
+
+	/*
+	* 获取wt控制器
+	*/
+	virtual wt* get_wt() = 0;
+
+	/*
+	* 获取全局配置对象
+	*/
+	virtual global_control_config* get_global_control_config() = 0;
+
+	/*
+	* 获取无线资源管理配置对象
+	*/
+	virtual rrm_config* get_rrm_config() = 0;
+
+	/*
+	* 获取事件配置对象
+	*/
+	virtual tmc_config* get_tmc_config() = 0;
+
+	/*
+	* 获取路由配置对象
+	*/
+	virtual route_config* get_route_config() = 0;
+
 	/*
 	* 初始化
 	*/

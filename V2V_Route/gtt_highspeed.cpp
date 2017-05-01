@@ -90,11 +90,11 @@ void gtt_highspeed::initialize() {
 			possion[roadId].pop_back();
 		
 			//初始化pattern占用情况的数组全为false，即未被占用状态
-			p->m_pattern_occupied = new bool[((rrm_config*)context::get_context()->get_bean("rrm_config"))->get_pattern_num()];
+			p->m_pattern_occupied = new bool[get_rrm_config()->get_pattern_num()];
 			memset(p->m_pattern_occupied, false, sizeof(p->m_pattern_occupied));
 
 			//根据是否采用时分的资源分配算法决定是否维护m_slot_time_idx,即当前车辆能发送数据的TTI
-			int granularity = ((rrm_config*)context::get_context()->get_bean("rrm_config"))->get_time_division_granularity();
+			int granularity = get_rrm_config()->get_time_division_granularity();
 			if (granularity == 2) {
 				double zone_length = 346.41;
 				int zone_idx = (int)abs((p->m_absx - (-1732.0f)) / 346.4f);//0到9
@@ -132,7 +132,7 @@ void gtt_highspeed::fresh_location() {
 
 		//每次更新车辆位置时重新判断车辆所在的zone_idx
 		auto p = get_vue_array()[vue_id].get_physics_level();
-		int granularity = ((rrm_config*)context::get_context()->get_bean("rrm_config"))->get_time_division_granularity();
+		int granularity = get_rrm_config()->get_time_division_granularity();
 		if (granularity == 2) {
 			double zone_length = 346.41;
 			int zone_idx = (int)abs((p->m_absx - (-1732.0f)) / 346.4f);//0到9
