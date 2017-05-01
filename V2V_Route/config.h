@@ -2,6 +2,7 @@
 #include<vector>
 #include<string>
 #include<stdexcept>
+#include<iostream>
 #include<fstream>
 #include"reflect/object.h"
 #include"enumeration.h"
@@ -10,25 +11,6 @@
 
 class global_control_config :public object {
 	REGISTE_MEMBER_HEAD(global_control_config)
-		/*
-		* 平台
-		*/
-private:
-	platform m_platform;
-	void set_platform() {
-		std::ifstream in1("config/beans.xml");
-		std::ifstream in2("config\\beans.xml");
-		if (in1.is_open()) {
-			m_platform = Linux;
-		}
-		else if (in2.is_open()) {
-			m_platform = Windows;
-		}
-	}
-public:
-	platform get_platform() {
-		return m_platform;
-	}
 
 	/*
 	* 仿真时长
@@ -42,7 +24,6 @@ public:
 	int get_ntti() {
 		return m_ntti;
 	}
-
 };
 
 
@@ -299,7 +280,7 @@ public:
 private:
 	int m_pattern_num;
 	void set_pattern_num() {
-		m_pattern_num = get_total_bandwidth() / s_BANDWIDTH_OF_RB / get_rb_num_per_pattern();
+		m_pattern_num = get_total_bandwidth() * 1000000 / s_BANDWIDTH_OF_RB / get_rb_num_per_pattern();
 	}
 public:
 	int get_pattern_num() {

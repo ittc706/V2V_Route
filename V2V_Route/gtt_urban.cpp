@@ -61,13 +61,7 @@ void gtt_urban::initialize() {
 	double DistanceFromBottomLeft = 0;
 
 	ofstream vue_coordinate;
-
-	if (get_global_control_config()->get_platform() == Windows) {
-		vue_coordinate.open("log\\vue_coordinate.txt");
-	}
-	else {
-		vue_coordinate.open("log/vue_coordinate.txt");
-	}
+	vue_coordinate.open("log/vue_coordinate.txt");
 
 	default_random_engine e((unsigned)time(0));
 	uniform_real_distribution<double> u(0, 2 * (__config->get_road_length_ew() + __config->get_road_length_sn()));

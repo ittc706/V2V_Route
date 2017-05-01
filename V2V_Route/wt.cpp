@@ -33,12 +33,8 @@ std::vector<double>* wt::m_qpsk_mi = nullptr;
 
 void wt::set_resource() {
 	ifstream in;
-	if (((global_control_config*)context::get_context()->get_bean("global_control_config"))->get_platform()== Windows) {
-		in.open("wt\\qpsk_mi.md");
-	}
-	else {
-		in.open("wt/qpsk_mi.md");
-	}
+	in.open("wt/qpsk_mi.md");
+
 	m_qpsk_mi = new vector<double>();
 	istream_iterator<double> in_iter(in), eof;
 	m_qpsk_mi->assign(in_iter, eof);

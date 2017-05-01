@@ -15,7 +15,6 @@ struct event_trigger_dto {
 class v2x_time;
 class gtt;
 class wt;
-class global_control_config;
 class rrm_config;
 class tmc_config;
 class route_config;
@@ -36,11 +35,6 @@ public:
 	* 获取wt控制器
 	*/
 	virtual wt* get_wt() = 0;
-
-	/*
-	* 获取全局配置对象
-	*/
-	virtual global_control_config* get_global_control_config() = 0;
 
 	/*
 	* 获取无线资源管理配置对象

@@ -244,16 +244,9 @@ void route_udp::initialize() {
 	int vue_num = get_gtt()->get_vue_num();
 	m_node_array = new route_udp_node[vue_num];
 
-	if (get_global_control_config()->get_platform() == Windows) {
-		s_logger_pattern.open("log\\route_udp_pattern_log.txt");
-		s_logger_link.open("log\\route_udp_link_log.txt");
-		s_logger_event.open("log\\route_udp_event_log.txt");
-	}
-	else {
-		s_logger_pattern.open("log/route_udp_pattern_log.txt");
-		s_logger_link.open("log/route_udp_link_log.txt");
-		s_logger_event.open("log/route_udp_event_log.txt");
-	}
+	s_logger_pattern.open("log/route_udp_pattern_log.txt");
+	s_logger_link.open("log/route_udp_link_log.txt");
+	s_logger_event.open("log/route_udp_event_log.txt");
 
 	route_udp_node::s_node_id_per_pattern = vector<set<int>>(get_rrm_config()->get_pattern_num());
 }

@@ -67,13 +67,7 @@ void gtt_highspeed::initialize() {
 	int vue_id = 0;
 
 	/*ofstream vue_coordinate;
-
-	if (context::get_context()->get_global_control_config()->get_platform() == Windows) {
-		vue_coordinate.open("log\\vue_coordinate.txt");
-	}
-	else {
-		vue_coordinate.open("log/vue_coordinate.txt");
-	}*/
+	vue_coordinate.open("log/vue_coordinate.txt");*/
 
 	for (int roadId = 0; roadId != __config->get_road_num(); roadId++) {
 		for (int uprIdx = 0; uprIdx != m_pupr[roadId]; uprIdx++) {

@@ -173,16 +173,9 @@ void route_tcp::initialize() {
 	int vue_num = get_gtt()->get_vue_num();
 	m_node_array = new route_tcp_node[vue_num];
 
-	if (get_global_control_config()->get_platform() == Windows) {
-		s_logger_pattern.open("log\\route_tcp_pattern_log.txt");
-		s_logger_link.open("log\\route_tcp_link_log.txt");
-		s_logger_event.open("log\\route_tcp_event_log.txt");
-	}
-	else {
-		s_logger_pattern.open("log/route_tcp_pattern_log.txt");
-		s_logger_link.open("log/route_tcp_link_log.txt");
-		s_logger_event.open("log/route_tcp_event_log.txt");
-	}
+	s_logger_pattern.open("log/route_tcp_pattern_log.txt");
+	s_logger_link.open("log/route_tcp_link_log.txt");
+	s_logger_event.open("log/route_tcp_event_log.txt");
 
 	route_tcp_node::s_node_id_per_pattern = vector<set<int>>(get_rrm_config()->get_pattern_num());
 }

@@ -30,9 +30,9 @@ void context::init() {
 
 	create_and_init_bean();
 
-	dependency_injection();
-
 	pre_process();
+
+	dependency_injection();
 
 	post_process();
 }

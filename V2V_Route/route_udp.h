@@ -391,7 +391,6 @@ public:
 class v2x_time;
 class gtt;
 class wt;
-class global_control_config;
 class rrm_config;
 class tmc_config;
 class route_config;
@@ -488,7 +487,6 @@ private:
 	v2x_time* m_time;
 	gtt* m_gtt;
 	wt* m_wt;
-	global_control_config* m_global_control_config;
 	rrm_config* m_rrm_config;
 	tmc_config* m_tmc_config;
 	route_config* m_route_config;
@@ -501,9 +499,6 @@ private:
 	}
 	void set_wt(object* t_wt) {
 		m_wt = (wt*)t_wt;
-	}
-	void set_global_control_config(object* t_global_control_config) {
-		m_global_control_config = (global_control_config*)t_global_control_config;
 	}
 	void set_rrm_config(object* t_rrm_config) {
 		m_rrm_config = (rrm_config*)t_rrm_config;
@@ -525,10 +520,6 @@ public:
 
 	wt* get_wt() override {
 		return m_wt;
-	}
-
-	global_control_config* get_global_control_config() override {
-		return m_global_control_config;
 	}
 
 	rrm_config* get_rrm_config() override {
