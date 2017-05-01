@@ -9,20 +9,20 @@
 #include"../route_tcp.h"
 #include"../route_udp.h"
 
-REGISTE_MEMBER_RESOURCE(gtt_urban)
-REGISTE_MEMBER_RESOURCE(gtt_highspeed)
-REGISTE_MEMBER_RESOURCE(wt);
-REGISTE_MEMBER_RESOURCE(tmc);
+REGISTE_CLASS_ID_RESOURCE(gtt_urban)
+REGISTE_CLASS_ID_RESOURCE(gtt_highspeed)
+REGISTE_CLASS_ID_RESOURCE(wt);
+REGISTE_CLASS_ID_RESOURCE(tmc);
 
-REGISTE_MEMBER_RESOURCE(global_control_config)
-REGISTE_MEMBER_RESOURCE(gtt_highspeed_config)
-REGISTE_MEMBER_RESOURCE(gtt_urban_config)
-REGISTE_MEMBER_RESOURCE(rrm_config)
-REGISTE_MEMBER_RESOURCE(tmc_config)
-REGISTE_MEMBER_RESOURCE(route_config)
-REGISTE_MEMBER_RESOURCE(system_control)
-REGISTE_MEMBER_RESOURCE(route_tcp)
-REGISTE_MEMBER_RESOURCE(route_udp)
+REGISTE_CLASS_ID_RESOURCE(global_control_config)
+REGISTE_CLASS_ID_RESOURCE(gtt_highspeed_config)
+REGISTE_CLASS_ID_RESOURCE(gtt_urban_config)
+REGISTE_CLASS_ID_RESOURCE(rrm_config)
+REGISTE_CLASS_ID_RESOURCE(tmc_config)
+REGISTE_CLASS_ID_RESOURCE(route_config)
+REGISTE_CLASS_ID_RESOURCE(system_control)
+REGISTE_CLASS_ID_RESOURCE(route_tcp)
+REGISTE_CLASS_ID_RESOURCE(route_udp)
 
 
 
@@ -30,7 +30,7 @@ REGISTE_MEMBER_RESOURCE(route_udp)
 * ÁãÔªº¯Êý·´Éä×¢²á
 */
 object* new_instance(const std::string& class_name) {
-	FACTORY_INVOKE_HEAD
+	FACTORY_INVOKE_START
 		FACTORY_INVOKE(system_control)
 		FACTORY_INVOKE(global_control_config)
 		FACTORY_INVOKE(gtt_highspeed_config)
@@ -46,7 +46,7 @@ object* new_instance(const std::string& class_name) {
 		FACTORY_INVOKE(route_tcp)
 		FACTORY_INVOKE(route_udp)
 
-		return nullptr;
+		FACTORY_INVOKE_END
 }
 
 /*
@@ -129,10 +129,8 @@ void invoke(const object* obj, const std::string& method_name, void* param1) {
 void invoke(const object* obj, const std::string& method_name, const std::string& param1) {
 	long class_id = obj->get_class_id();
 	METHOD_INVOKE_CLASS_START(global_control_config)
-		METHOD_INVOKE_ONE_PARAM(global_control_config, set_platform)
 		METHOD_INVOKE_ONE_PARAM(global_control_config, set_ntti)
-		METHOD_INVOKE_ONE_PARAM(global_control_config, set_gtt_mode)
-		METHOD_INVOKE_ONE_PARAM(global_control_config, set_route_mode)
+		METHOD_INVOKE_ONE_PARAM(global_control_config, set_platform)
 		METHOD_INVOKE_CLASS_END(global_control_config)
 
 

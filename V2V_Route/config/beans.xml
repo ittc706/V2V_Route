@@ -4,8 +4,6 @@
 <bean id="global_control_config", class="global_control_config">
 	<property name="platform", value="Windows"/>
 	<property name="ntti", value="1000"/>
-	<property name="gtt_mode", value="URBAN"/>
-	<property name="route_mode", value="UDP"/>
 </bean>
 
 

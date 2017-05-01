@@ -7,11 +7,11 @@
 
 #define INVALID -1
 
-class global_control_config :public object{
+class global_control_config :public object {
 	REGISTE_MEMBER_HEAD(global_control_config)
-	/*
-	* 平台
-	*/
+		/*
+		* 平台
+		*/
 private:
 	platform m_platform;
 public:
@@ -19,7 +19,7 @@ public:
 		if (t_platform == "Windows") {
 			m_platform = Windows;
 		}
-		else if(t_platform == "Linux") {
+		else if (t_platform == "Linux") {
 			m_platform = Linux;
 		}
 		else {
@@ -41,48 +41,6 @@ public:
 	}
 	int get_ntti() {
 		return m_ntti;
-	}
-
-	/*
-	* gtt模式选择
-	*/
-private:
-	gtt_mode m_gtt_mode;
-public:
-	void set_gtt_mode(std::string t_gtt_mode) {
-		if (t_gtt_mode == "URBAN") {
-			m_gtt_mode = URBAN;
-		}
-		else if (t_gtt_mode == "HIGHSPEED") {
-			m_gtt_mode = HIGHSPEED;
-		}
-		else {
-			throw std::logic_error("error");
-		}
-	}
-	gtt_mode get_gtt_mode() {
-		return m_gtt_mode;
-	}
-
-	/*
-	* route模式选择
-	*/
-private:
-	route_mode m_route_mode;
-public:
-	void set_route_mode(std::string t_route_mode) {
-		if (t_route_mode == "TCP") {
-			m_route_mode = TCP;
-		}
-		else if(t_route_mode == "UDP"){
-			m_route_mode = UDP;
-		}
-		else {
-			throw std::logic_error("error");
-		}
-	}
-	route_mode get_route_mode() {
-		return m_route_mode;
 	}
 
 };

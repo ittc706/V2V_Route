@@ -21,12 +21,11 @@ friend void invoke(const object* obj, const std::string& method_name, const std:
 friend void invoke(const object* obj, const std::string& method_name, object* param1); \
 
 
-/*--------------------------------------------------------------------------*/
 
 /*
 * 注册类型id的宏
 */
-#define REGISTE_CLASS_ID(class_type)\
+#define REGISTE_CLASS_ID_HEAD(class_type)\
 public:\
 	static const long class_id;\
 
@@ -65,7 +64,7 @@ private:
 */
 #define REGISTE_MEMBER_HEAD(class_type)\
 INVOKE_FRIEND_DECLARED \
-REGISTE_CLASS_ID(class_type) \
+REGISTE_CLASS_ID_HEAD(class_type) \
 REGISTE_FACTORY_METHOD(class_type) \
 OVERRIDE_OPERATOR_NEW(class_type) \
 OVERRIDE_OPERATOR_DELETE(class_type) \
@@ -73,20 +72,25 @@ OVERRIDE_OPERATOR_DELETE(class_type) \
 /*
 * 在源文件中初始化类型id
 */
-#define REGISTE_MEMBER_RESOURCE(class_type)\
+#define REGISTE_CLASS_ID_RESOURCE(class_type)\
 const long class_type::class_id = ++object::class_id;
 
 
 /*--------------------------------------------------------------------------*/
 //注意，以下几个宏中几个固定字符:class_name,obj,method_name,param1
-#define FACTORY_INVOKE_HEAD \
+#define FACTORY_INVOKE_START \
 if(class_name==""){\
-	;\
+	return nullptr;\
 }\
 
 #define FACTORY_INVOKE(class_type) \
 else if(#class_type==class_name){\
 	return class_type::new_instance();\
+}\
+
+#define FACTORY_INVOKE_END \
+else {\
+	return nullptr;\
 }\
 
 

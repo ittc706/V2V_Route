@@ -138,7 +138,6 @@
     <ClInclude Include="wt.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="config.cpp" />
     <ClCompile Include="gtt.cpp" />
     <ClCompile Include="gtt_highspeed.cpp" />
     <ClCompile Include="gtt_urban.cpp" />
