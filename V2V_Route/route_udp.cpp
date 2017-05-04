@@ -124,6 +124,7 @@ pair<int, int> route_udp_node::select_relay_information() {
 ofstream route_udp::s_logger_pattern;
 ofstream route_udp::s_logger_link;
 ofstream route_udp::s_logger_event;
+ofstream route_udp::s_logger_link_pdr_distance;
 
 void route_udp::log_node_pattern(int t_source_node_id,
 	int t_relay_node_id,
@@ -240,6 +241,7 @@ void route_udp::initialize() {
 	s_logger_pattern.open("log/route_udp_pattern_log.txt");
 	s_logger_link.open("log/route_udp_link_log.txt");
 	s_logger_event.open("log/route_udp_event_log.txt");
+	s_logger_link_pdr_distance.open("log/route_udp_link_pdr_distance.txt");
 
 	route_udp_node::s_node_id_per_pattern = vector<set<int>>(get_rrm_config()->get_pattern_num()+1);
 }
@@ -540,6 +542,8 @@ void route_udp::transmit_data() {
 
 							log_link(source_node_id, (*it)->get_destination_node_id(), "FAILED", loss_reason, source_node.m_adjacent_list[count].second, temp);
 
+							s_logger_link_pdr_distance << 0 << "," << vue_physics::get_distance(source_node_id, destination_node.get_id()) << endl;
+
 							if (abs(source_node.m_adjacent_list[count].second.send_node_x - temp.send_node_x) < 50 && abs(source_node.m_adjacent_list[count].second.send_node_y - temp.send_node_y) < 50 &&
 								abs(source_node.m_adjacent_list[count].second.receive_node_x - temp.receive_node_x) < 50 && abs(source_node.m_adjacent_list[count].second.receive_node_y - temp.receive_node_y) < 50)//将卷绕的车辆排除在外
 								//add_failed_route_event(source_node.peek_send_event_queue());
@@ -579,6 +583,8 @@ void route_udp::transmit_data() {
 						if (source_node.m_send_event_queue.front()->get_final_destination_node_id() == destination_node.get_id()) {
 
 							//OP1:记录route_event传送成功,并且永久保存到列表里
+
+							s_logger_link_pdr_distance << 1 << "," << vue_physics::get_distance(source_node_id, destination_node.get_id()) << endl;
 
 							if (vue_physics::get_distance(source_node.m_send_event_queue.front()->get_origin_source_node_id(), destination_node.get_id()) < 500) {
 								//add_successful_route_event(source_node.poll_send_event_queue());
