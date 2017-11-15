@@ -42,6 +42,29 @@ private:
 	static int s_event_count;
 
 	/*
+	* 事件触发时的tti
+	*/
+private:
+	const int m_trigger_tti;
+public:
+	int get_trigger_tti() {
+		return m_trigger_tti;
+	}
+
+	/*
+	* 事件传输完毕时的tti
+	*/
+private:
+	int m_finished_tti = -1;
+public:
+	void set_finished_tti(int t_finished_tti) {
+		m_finished_tti = t_finished_tti;
+	}
+	int get_finished_tti() {
+		return m_finished_tti;
+	}
+
+	/*
 	* 源节点
 	*/
 private:
@@ -116,11 +139,12 @@ public:
 	/*
 	* 构造函数，提供给事件触发模块调用
 	*/
-	route_tcp_route_event(int t_source_node, int t_destination_node) :
-		m_event_id(s_event_count++), 
+	route_tcp_route_event(int t_source_node, int t_destination_node, int t_trigger_tti) :
+		m_event_id(s_event_count++),
 		m_origin_source_node_id(t_source_node),
 		m_final_destination_node_id(t_destination_node),
-		m_package_num(((tmc_config*)context::get_context()->get_bean("tmc_config"))->get_package_num()){
+		m_package_num(((tmc_config*)context::get_context()->get_bean("tmc_config"))->get_package_num()),
+		m_trigger_tti(t_trigger_tti) {
 		set_current_node_id(t_source_node);
 	}
 

@@ -239,7 +239,7 @@ void route_tcp::event_trigger() {
 				final_destination_node_id = u_node_id(s_engine);
 			}
 			get_node_array()[origin_source_node_id].offer_send_event_queue(
-				new route_tcp_route_event(origin_source_node_id, final_destination_node_id)
+				new route_tcp_route_event(origin_source_node_id, final_destination_node_id, get_time()->get_tti())
 				);
 			log_event(origin_source_node_id, final_destination_node_id);
 		}
@@ -504,6 +504,7 @@ void route_tcp::receive_data() {
 						relay_node.offer_send_event_queue(source_node.poll_send_event_queue());
 						relay_node.peek_send_event_queue()->set_current_node_id(relay_node_id);
 						if (relay_node.peek_send_event_queue()->is_finished()) {
+							relay_node.peek_send_event_queue()->set_finished_tti(get_time()->get_tti());
 							add_successful_event(relay_node.poll_send_event_queue());
 						}
 
