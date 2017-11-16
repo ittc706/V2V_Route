@@ -81,7 +81,7 @@ pair<int, int> route_tcp_node::select_relay_information() {
 
 	//先挑选路由车辆id
 	//<Warn>可以增加其他算法
-	int final_destination_node_id = peek_send_event_queue()->get_final_destination_node_id();
+	int final_destination_node_id = first_send_event_queue()->get_final_destination_node_id();
 
 	double min_distance = (numeric_limits<double>::max)();
 	for (int near_node_id : m_adjacent_list) {
@@ -216,7 +216,7 @@ void route_tcp::update_route_table_from_physics_level() {
 	for (int vue_id_i = 0; vue_id_i < vue_num; vue_id_i++) {
 		for (int vue_id_j = 0; vue_id_j < vue_num; vue_id_j++) {
 			if (vue_id_i == vue_id_j)continue;
-			if (vue_physics::get_distance(vue_id_i, vue_id_j) < 500) {
+			if (vue_physics::get_pl(vue_id_i, vue_id_j) < 1e-10) {
 				get_node_array()[vue_id_i].add_to_adjacent_list(vue_id_j);
 				get_node_array()[vue_id_j].add_to_adjacent_list(vue_id_i);
 			}
@@ -386,7 +386,7 @@ void route_tcp::send_ack() {
 				int selected_source_node_id = relay_node.m_last_round_request_per_pattern[pattern_idx][u(s_engine)];
 
 				route_tcp_node& selected_source_node = get_node_array()[selected_source_node_id];
-				route_tcp_route_event* route_event = selected_source_node.peek_send_event_queue();
+				route_tcp_route_event* route_event = selected_source_node.first_send_event_queue();
 
 				//创建链路事件
 				route_tcp_link_event* link_event = new route_tcp_link_event(
@@ -493,7 +493,17 @@ void route_tcp::receive_data() {
 						//丢包了
 						log_link(source_node_id, relay_node_id, "FAILED");
 
-						add_failed_event(link_event);
+						add_failed_link_event(link_event);
+
+						//如果已经重传超过2次
+						route_tcp_route_event *peek = source_node.first_send_event_queue();
+						if (peek->get_current_retransimit_count() > 2) {
+							add_failed_event(peek);
+						}
+						else {
+							peek->increase_current_retransimit_count();
+						}
+
 						//重置后重传
 						source_node.reset_syn_state();
 					}
@@ -501,11 +511,21 @@ void route_tcp::receive_data() {
 						//没有丢包
 						log_link(source_node_id, relay_node_id, "SUCCESSFUL");
 
-						relay_node.offer_send_event_queue(source_node.poll_send_event_queue());
-						relay_node.peek_send_event_queue()->set_current_node_id(relay_node_id);
-						if (relay_node.peek_send_event_queue()->is_finished()) {
-							relay_node.peek_send_event_queue()->set_finished_tti(get_time()->get_tti());
-							add_successful_event(relay_node.poll_send_event_queue());
+						route_tcp_route_event *peek = source_node.poll_send_event_queue();
+						peek->reset_current_retransimit_count();
+						
+
+						peek->set_current_node_id(relay_node_id);
+
+						if (peek->is_finished()) {
+							peek->set_finished_tti(get_time()->get_tti());
+							add_successful_event(peek);
+						}
+						else if (peek->get_through_node_vec().size() > 3) {
+							add_failed_event(peek);
+						}
+						else {
+							relay_node.offer_send_event_queue(peek);
 						}
 
 						delete link_event;

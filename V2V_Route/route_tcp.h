@@ -116,6 +116,7 @@ public:
 		return m_current_node_id == m_final_destination_node_id; 
 	}
 
+
 	/*
 	* 事件id
 	*/
@@ -135,6 +136,23 @@ public:
 		return m_package_num;
 	}
 
+	/*
+	* 重传次数
+	*/
+private:
+	int m_current_retransimit_count = 0;
+public:
+	void increase_current_retransimit_count() {
+		m_current_retransimit_count++;
+	}
+	void reset_current_retransimit_count() {
+		m_current_retransimit_count = 0;
+	}
+	int get_current_retransimit_count() {
+		return m_current_retransimit_count;
+	}
+
+
 public:
 	/*
 	* 构造函数，提供给事件触发模块调用
@@ -146,14 +164,6 @@ public:
 		m_package_num(((tmc_config*)context::get_context()->get_bean("tmc_config"))->get_package_num()),
 		m_trigger_tti(t_trigger_tti) {
 		set_current_node_id(t_source_node);
-	}
-
-	/*
-	* 拷贝当前事件，拷贝前后event_id不变
-	* 当某一跳成功传输，但是标记成功与否的信令传输失败，则会造成多条链路，此时才会调用clone
-	*/
-	void transfer_to(int t_node_id) {
-		set_current_node_id(t_node_id);
 	}
 
 	/*
@@ -272,11 +282,11 @@ public:
 		m_send_event_queue.push(t_event);
 	}
 	route_tcp_route_event* poll_send_event_queue() {
-		route_tcp_route_event* temp = m_send_event_queue.front();
+		route_tcp_route_event* first = first_send_event_queue();
 		m_send_event_queue.pop();
-		return temp;
+		return first;
 	}
-	route_tcp_route_event* peek_send_event_queue() {
+	route_tcp_route_event* first_send_event_queue() {
 		return m_send_event_queue.front();
 	}
 	bool is_send_event_queue_empty() {
@@ -426,18 +436,25 @@ private:
 	* 成功/失败传输的事件
 	*/
 	std::vector<route_tcp_route_event*> m_successful_event_vec;
-	std::vector<route_tcp_link_event*> m_failed_event_vec;
+	std::vector<route_tcp_link_event*> m_failed_link_event_vec;
+	std::vector<route_tcp_route_event*> m_failed_event_vec;
 	void add_successful_event(route_tcp_route_event* t_successful_event_vec) {
 		m_successful_event_vec.push_back(t_successful_event_vec);
 	}
-	void add_failed_event(route_tcp_link_event* t_failed_event_vec) {
+	void add_failed_link_event(route_tcp_link_event* t_failed_event_vec) {
+		m_failed_link_event_vec.push_back(t_failed_event_vec);
+	}
+	void add_failed_event(route_tcp_route_event* t_failed_event_vec) {
 		m_failed_event_vec.push_back(t_failed_event_vec);
 	}
 public:
 	const std::vector<route_tcp_route_event*>& get_successful_event_vec() {
 		return m_successful_event_vec;
 	}
-	const std::vector<route_tcp_link_event*>& get_failed_event_vec(){
+	const std::vector<route_tcp_link_event*>& get_failed_link_event_vec(){
+		return m_failed_link_event_vec;
+	}
+	const std::vector<route_tcp_route_event*>& get_failed_event_vec() {
 		return m_failed_event_vec;
 	}
 

@@ -33,12 +33,12 @@ using namespace std;
 void tmc::statistic() {
 	context* __context = context::get_context();
 	ofstream success_route_event;
-	ofstream failed_route_event;
+	ofstream event_count;
 	ofstream route_count;
 	ofstream total_delay;
 
 	success_route_event.open("log/success_event.txt");
-	failed_route_event.open("log/failed_event.txt");
+	event_count.open("log/event_count.txt");
 	route_count.open("log/route_count.txt");
 	total_delay.open("log/total_delay.txt");
 
@@ -46,19 +46,18 @@ void tmc::statistic() {
 
 	if (__object->get_class_id()==route_tcp::class_id) {
 		route_tcp* __route_tcp = (route_tcp*)__object;
-		success_route_event << "total success event: " << __route_tcp->get_successful_event_vec().size() << endl;
-		failed_route_event << "total failed event: " << __route_tcp->get_failed_event_vec().size() << endl;
-
 		for (route_tcp_route_event* tcp_event : __route_tcp->get_successful_event_vec()) {
 			success_route_event << tcp_event->to_string();
 			route_count << tcp_event->get_through_node_vec().size() << endl;
 			total_delay << (tcp_event->get_finished_tti() - tcp_event->get_trigger_tti() + 1) << endl;
 		}
+
+		event_count << __route_tcp->get_successful_event_vec().size() << endl;
+		event_count << __route_tcp->get_failed_event_vec().size() << endl;
 	}
 	else {
+
 		route_udp* __route_udp = (route_udp*)__object;
-		success_route_event << "total success event: " << __route_udp->get_success_route_event_num() << endl;
-		failed_route_event << "total failed event: " << __route_udp->get_failed_route_event_num() << endl;
 		
 		for (route_udp_route_event* udp_event : __route_udp->get_successful_route_event_vec()) {
 			success_route_event << udp_event->to_string();

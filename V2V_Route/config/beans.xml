@@ -1,5 +1,5 @@
 <bean id="global_control_config", class="global_control_config">
-	<property name="ntti", value="20000"/>
+	<property name="ntti", value="10000"/>
 </bean>
 
 <bean id="gtt_highspeed_config", class="gtt_highspeed_config">
